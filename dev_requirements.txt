@@ -1,0 +1,3 @@
+-r requirements.txt
+django-tastypie
+-e git+git@github.com:ella/ella.git@cleanup#egg=ella
