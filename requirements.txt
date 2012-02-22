@@ -1,0 +1,2 @@
+-e git+git@github.com:ella/ella.git@cleanup#egg=ella
+-e git+git@github.com:whit/django-redaction.git#egg=redaction
