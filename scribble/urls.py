@@ -1,7 +1,7 @@
-from django.conf.urls.defaults import patterns, include, url, handler404, handler500
-from django.views.generic.simple import direct_to_template
-
 from django.contrib import admin
+from django.conf.urls.defaults import patterns, include, url, handler404, handler500
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.generic.simple import direct_to_template
 
 admin.autodiscover()
 
@@ -14,4 +14,4 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     (r'^api/', include(api.urls)),
     (r'^$', direct_to_template, {'template': 'index.html'}),
-)
+) + staticfiles_urlpatterns()

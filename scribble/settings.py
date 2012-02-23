@@ -16,11 +16,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': join(gettempdir(), 'redaction_example.db'), # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': join(gettempdir(), 'scribble.db'), # Or path to database file if using sqlite3.
+        'USER': '', # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -57,7 +57,7 @@ USE_L10N = True
 
 MEDIA_ROOT = join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
-STATIC_ROOT = join(PROJECT_ROOT, 'static')
+STATIC_ROOT = join(PROJECT_ROOT, 'staticc')
 STATIC_URL = '/static/'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
@@ -75,6 +75,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    join(PROJECT_ROOT, 'static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -100,7 +101,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'redaction_front.urls'
+ROOT_URLCONF = 'scribble.urls'
 
 TEMPLATE_DIRS = (
     join(PROJECT_ROOT, 'templates'),
@@ -121,16 +122,16 @@ INSTALLED_APPS = (
     'ella.articles',
 
     'tastypie',
-    'redaction',
+    'scribble',
 
     # test load resources from installed apps
-    'redaction_front.testapp',
+    'scribble.testapp',
 
 )
 
 # redaction API settings
 REDACTION_RESOURCE_MODULES = (
-    'redaction_front.resources',
+    'scribble.resources',
 )
 
 # A sample logging configuration. The only tangible logging
