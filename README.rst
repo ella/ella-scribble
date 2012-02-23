@@ -18,3 +18,5 @@ With virtualenv and virtualenvwrapper::
     $ python manage.py runserver
 
 And open http://127.0.0.1:8000 in yaour browser. On index page you can see more info.
+
+Also you can create file redaction_front/settings_local.py with your own settings.
