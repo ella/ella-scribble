@@ -1,2 +1,3 @@
-redaction_front/media/*
-redaction_front/settings_local.py
+scribble/media/*
+scribble/settings_local.py
+*.pyc
