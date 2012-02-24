@@ -135,7 +135,6 @@ ko.bindingHandlers['dataTable'] = {
                 return destRow[0];
             }
         }
-        console.log(options);
 
         $(element).dataTable(options);
         $.data(element, isInitialisedKey, true);
