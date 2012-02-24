@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row-fluid"><div class="span12">
+    <h1>Articles</h1>
+    
+    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" data-bind="dataTable: {
+        dataSource: data,
+        rowTemplate: 'rowTemplate', 
+        options: {
+            aoColumns: [
+                {sTitle: 'Id', mDataProp:'id'},
+                {sTitle: 'Title', mDataProp:'title'},
+                {sTitle: 'Category', mDataProp:'category'},
+                {sTitle: 'Publish from', mDataProp:'publish_from'},
+                {sTitle: 'Created on', mDataProp:'created'},
+                {sTitle: 'WWW', mDataProp: null},
+                {sTitle: 'Actions', mDataProp: null},
+            ],
+            sDom: '<\'row-fluid\'<\'span6\'l><\'span6\'f>r>t<\'row-fluid\'<\'span6\'i><\'span6\'p>>',
+            sPaginationType: 'bootstrap',
+            oLanguage: {
+                sLengthMenu: '_MENU_ records per page'
+            },
+        }}">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+</div></div>
+
+<script id="rowTemplate" type="text/html">
+    <td><label data-bind="text: id" /></td>
+    <td><a data-bind="attr: {href: url}"><strong data-bind="text: title"></strong></a></td>
+    <td><label data-bind="text: category.title" /></td>
+    <td><label data-bind="text: publish_from" /></td>
+    <td><label data-bind="text: created" /></td>
+    <td><a target="_blank" class="btn btn-mini" data-bind="attr: { href: url, title: title }"><i class="icon-eye-open"></i> show on page</a></td>
+    <td>
+        <button class="btn btn-primary btn-mini">Show</button>
+        <button class="btn btn-danger btn-mini">Delete</button>
+    </td>        
+</script>
+        
+<script type="text/javascript">
+    function DataGridModel() {
+        var self = this;
+        
+        self.data = ko.observableArray([]);
+        
+        self.processData = function (data) {
+            self.data(data['objects']);
+        };
+        
+        self.getData = function () {
+            $.get('/api/r1/article/', {}, self.processData);    
+        };
+        
+        self.getData();
+    }
+    
+    ko.applyBindings(new DataGridModel());
+</script>
+{% endblock %}

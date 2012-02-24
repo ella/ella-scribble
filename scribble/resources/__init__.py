@@ -6,6 +6,11 @@ from ella.photos.models import Photo
 from ella.core.models import Publishable, Listing, Category, Author
 from ella.articles.models import Article
 
+class CategoryResource(ModelResource):
+    class Meta:
+        authorization = Authorization()
+        queryset = Category.objects.all()
+
 
 class PhotoResource(ModelResource):
     class Meta:
@@ -31,11 +36,16 @@ class PublishableResource(ModelResource):
     photo = fields.ForeignKey(PhotoResource, 'photo', null=True)
     authors = fields.ToManyField(AuthorResource, 'authors', full=True)
     listings = fields.ToManyField(ListingResource, 'listing_set', full=True)
+    category = fields.ForeignKey(CategoryResource, 'category', full=True)
 
     class Meta:
         authorization = Authorization()
         queryset = Publishable.objects.all()
         resource_name = 'publishable'
+
+    def dehydrate(self, bundle):
+        bundle.data['url'] = bundle.obj.get_domain_url()
+        return bundle
 
 
 class ArticleResource(PublishableResource):

@@ -13,5 +13,10 @@ api.collect_resources()
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     (r'^api/', include(api.urls)),
+
     (r'^$', direct_to_template, {'template': 'index.html'}),
+    (r'^articles/$', direct_to_template, {'template': 'articles.html'}),
+
+    ('^', include('ella.core.urls')),
+
 ) + staticfiles_urlpatterns()
