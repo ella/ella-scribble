@@ -1,3 +1,5 @@
+define(['../knockout', '../datatables'], function(ko) {
+
 /// <reference path="knockout-1.3.0beta.debug.js" />
 /// <reference path="knockout.mapping-latest.js" />
 /// <reference path="jquery-1.5.2-vsdoc.js" />
@@ -227,3 +229,5 @@ ko.bindingHandlers['dataTable'] = {
         return destOptions;
     }
 };
+
+});

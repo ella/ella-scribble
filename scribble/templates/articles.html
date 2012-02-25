@@ -40,24 +40,4 @@
         <button class="btn btn-danger btn-mini">Delete</button>
     </td>        
 </script>
-        
-<script type="text/javascript">
-    function DataGridModel() {
-        var self = this;
-        
-        self.data = ko.observableArray([]);
-        
-        self.processData = function (data) {
-            self.data(data['objects']);
-        };
-        
-        self.getData = function () {
-            $.get('/api/r1/article/', {}, self.processData);    
-        };
-        
-        self.getData();
-    }
-    
-    ko.applyBindings(new DataGridModel());
-</script>
 {% endblock %}
