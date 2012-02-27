@@ -1,9 +1,20 @@
 define([
-    './lib/knockout',
-    './lib/jquery',
-    './lib/underscore'
-], function(ko) {
+    './Auth/User',
+    './Core/Author',
+    './Core/Source',
+    './Articles/Article'
+], function(User, Author, Source, Article) {
     return {
+        Auth: {
+            User: User
+        },
+        Core: {
+            Author: Author,
+            Source: Source
+        },
+        Articles: {
+            Article: Article
+        },
         I_am_scribble: true
     };
 });
