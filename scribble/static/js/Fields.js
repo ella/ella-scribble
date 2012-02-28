@@ -44,6 +44,9 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
         this.draw = function() {
             return this.val().draw_reference();
         };
+        this.db_value = function() {
+            return this.val().vals.id.val();
+        };
         return this;
     };
     
@@ -57,6 +60,9 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
             });
             return $ul;
         };
+        this.db_value = _(this.val()).map(function(f) {
+            return f.vals.id;
+        });
         return this;
     };
     
@@ -65,6 +71,10 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
             var $input = $('<input data-bind="value: val">');
             ko.applyBindings({val: this.val}, $input[0]);
             return $input;
+        };
+        this.db_value = function() {
+            var v = this.val();
+            return v;
         };
         return this;
     };

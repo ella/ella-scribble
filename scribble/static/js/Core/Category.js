@@ -1,5 +1,6 @@
 define(['../EllaObject', '../Sites/Site', '../Fields'], function(EllaObject, Site, Fields) {
     var Category = function(arg) {
+        this.object_type = 'category';
         this.fields.title = Fields.text;
         this.fields.description = Fields.text;
         this.fields.content = Fields.text;

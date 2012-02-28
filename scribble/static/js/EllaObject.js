@@ -9,7 +9,7 @@ define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], funct
                     vals[k] = new this.fields[k](arg[k]);
                 }
                 else {
-                    ;;; console.log('unexpected field', k, arg[k]);
+                    throw('unexpected field "' + k + "'");
                 }
             }
             this.vals = vals;
@@ -27,6 +27,18 @@ define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], funct
                 v.draw().appendTo($detail);
             });
             return $detail;
+        };
+        this.send = function() {
+            var data = {};
+            _(this.vals).each(function(v, k) {
+                data[k] = v.db_value();
+            });
+            $.ajax({
+                type: 'post',
+                url: '/api/r1/'+this.object_type+'/',
+                data: JSON.stringify(data),
+                headers:{"Content-Type":"application/json"}
+            });
         };
         return this;
     };

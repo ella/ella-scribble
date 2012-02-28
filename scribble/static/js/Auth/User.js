@@ -1,5 +1,6 @@
 define(['../EllaObject', '../Fields'], function(EllaObject, Fields) {
     var User = function(arg) {
+        this.object_type = 'user';
         this.fields.username = Fields.text;
         this.fields.password = Fields.password;
         return this.init(arg);

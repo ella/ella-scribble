@@ -8,6 +8,7 @@ define(
     ],
     function(EllaObject, Category, Author, Source, Fields) {
         var Article = function(arg) {
+            this.object_type = 'article';
             this.fields.title        = Fields.text;
             this.fields.upper_title  = Fields.text;
             this.fields.updated      = Fields.datetime;

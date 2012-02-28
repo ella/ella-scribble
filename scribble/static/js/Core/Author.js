@@ -1,5 +1,6 @@
 define(['../EllaObject', '../Auth/User', '../Fields'], function(EllaObject, User, Fields) {
     var Author = function(arg) {
+        this.object_type = 'author';
         this.fields.user        = Fields.foreign;
         this.fields.name        = Fields.text;
         this.fields.slug        = Fields.text;
