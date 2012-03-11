@@ -31,7 +31,10 @@ define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], funct
         this.save = function() {
             var data = {};
             _(this.vals).each(function(v, k) {
-                data[k] = v.db_value();
+                var val = v.db_value();
+                if (val !== undefined) {
+                    data[k] = v.db_value();
+                }
             });
             $.ajax({
                 type: 'post',
