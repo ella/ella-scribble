@@ -1,12 +1,12 @@
 define(['../EllaObject', '../Auth/User', '../Fields'], function(EllaObject, User, Fields) {
     var Author = function(arg) {
         this.object_type = 'author';
-        this.fields.user        = Fields.foreign;
-        this.fields.name        = Fields.text;
-        this.fields.slug        = Fields.text;
-        this.fields.description = Fields.text;
-        this.fields.text        = Fields.text;
-        this.fields.email       = Fields.text;
+        this.fields.user        = new Fields.foreign(User);
+        this.fields.name        = new Fields.text();
+        this.fields.slug        = new Fields.text();
+        this.fields.description = new Fields.text();
+        this.fields.text        = new Fields.text();
+        this.fields.email       = new Fields.text();
         return this.init(arg);
     }
     Author.prototype = new EllaObject();

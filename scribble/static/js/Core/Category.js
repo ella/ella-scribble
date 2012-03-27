@@ -1,14 +1,14 @@
 define(['../EllaObject', '../Sites/Site', '../Fields'], function(EllaObject, Site, Fields) {
     var Category = function(arg) {
         this.object_type = 'category';
-        this.fields.title = Fields.text;
-        this.fields.description = Fields.text;
-        this.fields.content = Fields.text;
-        this.fields.template = Fields.text;
-        this.fields.slug = Fields.text;
-        this.fields.parent_category = Fields.foreign;
-        this.fields.site = Fields.foreign;
-        this.fields.app_data = Fields.json;
+        this.fields.title           = new Fields.text();
+        this.fields.description     = new Fields.text();
+        this.fields.content         = new Fields.text();
+        this.fields.template        = new Fields.text();
+        this.fields.slug            = new Fields.text();
+        this.fields.parent_category = new Fields.foreign(Category);
+        this.fields.site            = new Fields.foreign(Site);
+        this.fields.app_data        = new Fields.json();
         return this.init(arg);
     };
     return Category;

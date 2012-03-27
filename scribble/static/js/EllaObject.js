@@ -1,12 +1,12 @@
 define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], function(Fields, ko) {
     var EllaObject = function() {
         this.fields = {};
-        this.fields.id = Fields.id;
+        this.fields.id = new Fields.id();
         this.init = function(arg) {
             var vals = {}
             for (var k in arg) {
                 if (this.fields[k]) {
-                    vals[k] = new this.fields[k](arg[k]);
+                    vals[k] = new this.fields[k](arg[k], this);
                 }
                 else {
                     throw('unexpected field "' + k + "'");
@@ -42,6 +42,15 @@ define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], funct
                 data: JSON.stringify(data),
                 headers:{"Content-Type":"application/json"}
             });
+        };
+        this.get = function(field_name) {
+            return this.vals[field_name].val();
+        };
+        this.set = function(field_name, new_value) {
+            var observable = this.vals[field_name].val;
+            var old_value = observable();
+            observable(new_value);
+            return old_value;
         };
         return this;
     };
