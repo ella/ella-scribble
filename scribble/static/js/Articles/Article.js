@@ -16,7 +16,7 @@ define(
             this.fields.description  = new Fields.text();
             this.fields.content      = new Fields.text();
             this.fields.category     = new Fields.foreign(Category);
-            this.fields.authors      = new Fields.array();
+            this.fields.authors      = new Fields.array(Author);
             this.fields.source       = new Fields.foreign(Source);
             this.fields.publish_from = new Fields.datetime();
             this.fields.publish_to   = new Fields.datetime();

@@ -46,41 +46,62 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
                 }
             },
             get_initial_value: function(arg) {
-                if (('_valid_field_value_constructor' in this) && arg.constructor === this._valid_field_value_constructor) {
+                if (('_valid_field_value_type' in this) && arg.constructor === this._valid_field_value_type) {
                     // OK
                 }
                 else {
-                    ;;; console.log('expecting object constructed with:',this._valid_field_value_constructor,'got:',arg);
+                    ;;; console.log('expecting object constructed with:',this._valid_field_value_type,'got:',arg);
                     throw "Invalid foreign object";
                 }
                 return arg;
             }
         });
         // called at e.g. Author.fields.user = new Fields.foreign(User)
-        return function(valid_constructor) {
+        return function(valid_type) {
             var field_instantiator = field_constructor.apply(this, arguments);
-            field_instantiator._valid_field_value_constructor = valid_constructor;
+            if (valid_type) field_instantiator._valid_field_value_type = valid_type;
             return field_instantiator;
         };
     })();
     
-    Fields.array = get_field_constructor({
-        type: 'array',
-        field_fields: {
-            draw: function() {
-                var $ul = $('<ul>');
-                _(this.val()).each(function(v) {
-                    $ul.append(v.draw_reference());
-                });
-                return $ul;
+    Fields.array = (function() {
+        var field_constructor = get_field_constructor({
+            type: 'array',
+            field_fields: {
+                draw: function() {
+                    var $ul = $('<ul>');
+                    _(this.val()).each(function(v) {
+                        $ul.append(v.draw_reference());
+                    });
+                    return $ul;
+                },
+                db_value: function() {
+                    return _.(this.vals()).map( function(f) {
+                        return f.vals.id;
+                    });
+                }
             },
-            db_value: function() {
-                return _.(this.vals()).map( function(f) {
-                    return f.vals.id;
-                });
+            get_initial_value: function(arg) {
+                var arr = $.makeArray(arg);
+                var field = this;
+                if ('_valid_element_type' in field) {
+                    function element_ok(el) {
+                        return el.constructor == field._valid_element_type;
+                    }
+                    if (!_(arr).all(element_ok)) {
+                        ;;; console.log('At least one field of',arr,'not passing',field._valid_element_type);
+                        throw "Some array elements didn't pass validation";
+                    }
+                }
+                return arr;
             }
+        });
+        return function(valid_type) {
+            var field_instantiator = field_constructor.apply(this, arguments);
+            if (valid_type) field_instantiator._valid_element_type = valid_type;
+            return field_instantiator;
         }
-    });
+    })();
     
     function GenericField() {
         this.draw = function() {
@@ -110,7 +131,7 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
                 get_initial_value = function(v) { return v || field_creation_arg.default_value; };
             }
             else {
-                get_initial_value = function(v) { return v; };
+                get_initial_value = _.identity;
             }
             
             // called at e.g. my_article.vals.title = new my_article.fields.title('Hello world')
