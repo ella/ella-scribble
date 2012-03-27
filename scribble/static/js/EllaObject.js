@@ -6,7 +6,7 @@ define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], funct
             var vals = {}
             for (var k in arg) {
                 if (this.fields[k]) {
-                    vals[k] = new this.fields[k](arg[k], this);
+                    vals[k] = new this.fields[k](arg[k]);
                 }
                 else {
                     throw('unexpected field "' + k + "'");

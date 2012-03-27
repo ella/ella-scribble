@@ -35,7 +35,7 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
     });
     
     Fields.foreign = (function() {
-        var rv = get_field_constructor.call(this,{
+        var field_constructor = get_field_constructor({
             type: 'foreign',
             field_fields: {
                 draw: function() {
@@ -45,21 +45,23 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
                     return this.val().vals.id.val();
                 }
             },
-            get_initial_value: function(arg, obj) {
-                if (('_valid_constructor' in obj) && arg.constructor === obj._valid_constructor) {
+            get_initial_value: function(arg) {
+                if (('_valid_field_value_constructor' in this) && arg.constructor === this._valid_field_value_constructor) {
                     // OK
                 }
                 else {
-                    ;;; console.log('expecting:',obj._valid_constructor,'got:',arg,'this:',this);
+                    ;;; console.log('expecting object constructed with:',this._valid_field_value_constructor,'got:',arg);
                     throw "Invalid foreign object";
                 }
                 return arg;
-            },
-            construction_callback: function(valid_constructor) {
-                rv._valid_constructor = valid_constructor;
             }
         });
-        return function(arg) { var _rv = rv.apply(this,arg); _rv._valid_constructor = arg; return _rv; };
+        // called at e.g. Author.fields.user = new Fields.foreign(User)
+        return function(valid_constructor) {
+            var field_instantiator = field_constructor.apply(this, arguments);
+            field_instantiator._valid_field_value_constructor = valid_constructor;
+            return field_instantiator;
+        };
     })();
     
     Fields.array = get_field_constructor({
@@ -94,6 +96,7 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
     };
     
     function get_field_constructor(field_creation_arg) {
+        // called at e.g. Article.fields.title = new Fields.text()
         var construct_field = function(field_construction_arg) {
             if ('type' in field_creation_arg) {} else {
                 throw 'type must be specified at field creation';
@@ -110,9 +113,10 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
                 get_initial_value = function(v) { return v; };
             }
             
-            var instantiate_field = function(initial_value, obj) {
+            // called at e.g. my_article.vals.title = new my_article.fields.title('Hello world')
+            var instantiate_field = function(initial_value) {
                 var me = this;
-                me.val = ko.observable(get_initial_value.call(me, initial_value, instantiate_field));
+                me.val = ko.observable(get_initial_value.call(instantiate_field, initial_value));
                 me.type = field_creation_arg.type;
                 $.extend(this, field_creation_arg.field_fields);
                 me.field_constructor = construct_field;
