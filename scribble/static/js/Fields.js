@@ -1,4 +1,4 @@
-define(['./lib/knockout', './lib/underscore'], function(ko) {
+define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, ko) {
     var Fields = {};
     
     Fields.text = get_field_constructor({
@@ -39,7 +39,7 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
             type: 'foreign',
             field_fields: {
                 draw: function() {
-                    return this.val().draw_reference();
+                    return this.val().draw('reference');
                 },
                 db_value: function() {
                     return this.val().vals.id.val();
@@ -71,7 +71,7 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
                 draw: function() {
                     var $ul = $('<ul>');
                     _(this.val()).each(function(v) {
-                        $ul.append(v.draw_reference());
+                        $ul.append(v.draw('reference'));
                     });
                     return $ul;
                 },
@@ -104,11 +104,10 @@ define(['./lib/knockout', './lib/underscore'], function(ko) {
     })();
     
     function GenericField() {
-        this.draw = function() {
-            var $input = $('<input data-bind="value: val">');
-            ko.applyBindings({val: this.val}, $input[0]);
-            return $input;
-        };
+        $.extend(this, new Drawable({
+            name: 'GenericField',
+            draw_modes: ['field']
+        }));
         this.db_value = function() {
             var v = this.val();
             return v;

@@ -1,4 +1,4 @@
-define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], function(Fields, ko) {
+define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/underscore'], function(Drawable, Fields, ko) {
     var EllaObject = function() {
         this.fields = {};
         this.fields.id = new Fields.id();
@@ -15,19 +15,17 @@ define(['./Fields', './lib/knockout', './lib/jquery', './lib/underscore'], funct
             this.vals = vals;
             return this;
         };
-        this.draw_reference = function() {
-            if (!this.vals.id) return null;
-            var $input = $('<input data-bind="value: id" type="number">');
-            ko.applyBindings({id: this.vals.id.val}, $input[0]);
-            return $input;
-        };
-        this.draw_detail = function() {
-            var $detail = $('<div>');
-            _(this.vals).each(function(v) {
-                v.draw().appendTo($detail);
+        this.vals_array = function() {
+            var rv = [];
+            _(this.vals).each(function(val, key) {
+                rv.push($.extend({}, val, {name: key}));
             });
-            return $detail;
+            return rv;
         };
+        $.extend(this, new Drawable({
+            name: 'EllaObject',
+            draw_modes: ['detail', 'reference']
+        }));
         this.save = function() {
             var data = {};
             _(this.vals).each(function(v, k) {

@@ -1,0 +1,23 @@
+<script type="text/html" id="js-template-EllaObject-detail">
+    <div class="ella-object-detail">
+        <p>EllaObject detail <span data-bind="text: object_type"></span></p>
+        <ul class="Fields" data-bind="foreach: vals_array()">
+            <li data-bind="template: $data.get_template_id()"></li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/html" id="js-template-EllaObject-reference">
+    <div class="ella-object-reference">
+        <p>EllaObject reference <span data-bind="text: object_type"></span></p>
+        <label>id</label>
+        <input type="number" data-bind="value: $data.get('id')" name="id" />
+    </div>
+</script>
+
+<script type="text/html" id="js-template-GenericField-field">
+    <div class="ella-object-field">
+        <label data-bind="text: type"></label>
+        <input data-bind="value: val" />
+    </div>
+</script>
