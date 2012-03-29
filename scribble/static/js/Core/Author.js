@@ -1,15 +1,17 @@
 define(['../EllaObject', '../Auth/User', '../Fields'], function(EllaObject, User, Fields) {
-    var Author = function(arg) {
-        this.object_type = 'author';
-        this.fields.user        = new Fields.foreign(User);
-        this.fields.name        = new Fields.text();
-        this.fields.slug        = new Fields.text();
-        this.fields.description = new Fields.text();
-        this.fields.text        = new Fields.text();
-        this.fields.email       = new Fields.text();
-        return this.init(arg);
-    }
-    Author.prototype = new EllaObject();
-    Author.prototype.constructor = Author;
+    var Author = EllaObject.subclass({
+        type: 'author',
+        fields: {
+            user: {
+                type: Fields.foreign,
+                construction_arg: User
+            },
+            name        : { type: Fields.text },
+            slug        : { type: Fields.text },
+            description : { type: Fields.text },
+            text        : { type: Fields.text },
+            email       : { type: Fields.text },
+        }
+    });
     return Author;
 });

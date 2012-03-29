@@ -1,11 +1,10 @@
 define(['../EllaObject', '../Fields'], function(EllaObject, Fields) {
-    var Site = function(arg) {
-        this.object_type = 'site';
-        this.fields.domain_name  = new Fields.text();
-        this.fields.display_name = new Fields.text();
-        return this.init(arg);
-    };
-    Site.prototype = new EllaObject();
-    Site.prototype.constructor = Site;
+    var Site = EllaObject.subclass({
+        type: 'site',
+        fields: {
+            domain_name:  { type: Fields.text },
+            display_name: { type: Fields.text }
+        }
+    });
     return Site;
 });

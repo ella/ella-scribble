@@ -57,7 +57,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             }
         });
         // called at e.g. Author.fields.user = new Fields.foreign(User)
-        return function(valid_type) {
+        return function(name, valid_type) {
             var field_instantiator = field_constructor.apply(this, arguments);
             if (valid_type) field_instantiator._valid_field_value_type = valid_type;
             return field_instantiator;
@@ -96,7 +96,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 return arr;
             }
         });
-        return function(valid_type) {
+        return function(name, valid_type) {
             var field_instantiator = field_constructor.apply(this, arguments);
             if (valid_type) field_instantiator._valid_element_type = valid_type;
             return field_instantiator;
@@ -112,12 +112,13 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             var v = this.val();
             return v;
         };
+        this.get_field_name = function() { return this.constructor.field_name };
         return this;
     };
     
     function get_field_constructor(field_creation_arg) {
         // called at e.g. Article.fields.title = new Fields.text()
-        var construct_field = function(field_construction_arg) {
+        var construct_field = function(field_name, field_construction_arg) {
             if ('type' in field_creation_arg) {} else {
                 throw 'type must be specified at field creation';
             }
@@ -139,11 +140,11 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 me.val = ko.observable(get_initial_value.call(instantiate_field, initial_value));
                 me.type = field_creation_arg.type;
                 $.extend(this, field_creation_arg.field_fields);
-                me.field_constructor = construct_field;
                 return me;
             };
             instantiate_field.prototype = new GenericField();
             instantiate_field.prototype.constructor = instantiate_field;
+            instantiate_field.field_name = field_name;
             return instantiate_field;
         }
         return construct_field;

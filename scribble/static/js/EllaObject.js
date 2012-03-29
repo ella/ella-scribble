@@ -38,7 +38,7 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
                 type: 'post',
                 url: '/api/r1/'+this.object_type+'/',
                 data: JSON.stringify(data),
-                headers:{"Content-Type":"application/json"}
+                headers: {"Content-Type":"application/json"}
             });
         };
         this.get = function(field_name) {
@@ -51,6 +51,20 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
             return old_value;
         };
         return this;
+    };
+    EllaObject.subclass = function(opt) {
+        var subclass = function(arg) {
+            var me = this;
+            me.object_type = opt.type;
+            var fields = me.fields = {};
+            _(opt.fields).each(function(field, name) {
+                fields[name] = new field.type(name, field.construction_arg);
+            });
+            return me.init(arg);
+        };
+        subclass.prototype = new EllaObject();
+        subclass.prototype.constructor = subclass;
+        return subclass;
     };
     return EllaObject;
 });
