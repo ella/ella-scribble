@@ -20,7 +20,9 @@ require(
                 };
                 
                 self.getData = function () {
-                    $.get('/api/r1/article/', {}, self.processData);    
+                    new scribble.Articles.Article().fetch().done( function(objects) {
+                        self.data(objects);
+                    });
                 };
                 
                 self.getData();
@@ -28,5 +30,6 @@ require(
             
             ko.applyBindings(new DataGridModel());
         });
+        window.scribble = scribble;
     }
 );

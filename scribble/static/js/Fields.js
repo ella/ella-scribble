@@ -47,13 +47,11 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             },
             get_initial_value: function(arg) {
                 if (('_valid_field_value_type' in this) && arg.constructor === this._valid_field_value_type) {
-                    // OK
+                    return arg;
                 }
                 else {
-                    ;;; console.log('expecting object constructed with:',this._valid_field_value_type,'got:',arg);
-                    throw "Invalid foreign object";
+                    return new this._valid_field_value_type(arg);
                 }
-                return arg;
             }
         });
         // called at e.g. Author.fields.user = new Fields.foreign(User)
@@ -85,15 +83,14 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 var arr = $.makeArray(arg);
                 var field = this;
                 if ('_valid_element_type' in field) {
-                    function element_ok(el) {
-                        return el.constructor == field._valid_element_type;
-                    }
-                    if (!_(arr).all(element_ok)) {
-                        ;;; console.log('At least one field of',arr,'not passing',field._valid_element_type);
-                        throw "Some array elements didn't pass validation";
-                    }
+                    var validated_arr = _(arr).map(function(el) {
+                        if (el.constructor === field._valid_element_type) {
+                            return el;
+                        }
+                        return new field._valid_element_type(el);
+                    });
                 }
-                return arr;
+                return validated_arr;
             }
         });
         return function(name, valid_type) {

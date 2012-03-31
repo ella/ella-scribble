@@ -12,6 +12,7 @@ define(
             fields: {
                 title:       { type: Fields.text },
                 upper_title: { type: Fields.text },
+                created:     { type: Fields.datetime },
                 updated:     { type: Fields.datetime },
                 slug:        { type: Fields.text },
                 description: { type: Fields.text },
@@ -29,7 +30,8 @@ define(
                     construction_arg: Source
                 },
                 publish_from: { type: Fields.datetime },
-                publish_to:   { type: Fields.datetime }
+                publish_to:   { type: Fields.datetime },
+                url:          { type: Fields.text     }
             }
         });
         return Article;
