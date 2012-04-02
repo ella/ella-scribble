@@ -94,10 +94,16 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
             return this.vals[field_name].val();
         },
         set: function(field_name, new_value) {
-            var observable = this.vals[field_name].val;
-            var old_value = observable();
-            observable(new_value);
-            return old_value;
+            if (field_name in this.vals) {
+                var observable = this.vals[field_name].val;
+                var old_value = observable();
+                observable(new_value);
+                return old_value;
+            }
+            else {
+                this.vals[field_name] = new this.fields[field_name](new_value);
+                return null;
+            }
         }
     };
     EllaObject.subclass = function(opt) {
