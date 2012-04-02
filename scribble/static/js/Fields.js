@@ -42,7 +42,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                     return this.val().draw('reference');
                 },
                 db_value: function() {
-                    return this.val().vals.id.val();
+                    return this.val().values();
                 }
             },
             get_initial_value: function(arg) {
@@ -74,8 +74,8 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                     return $ul;
                 },
                 db_value: function() {
-                    return _.(this.vals()).map( function(f) {
-                        return f.vals.id;
+                    return $.map(this.val(), function(f) {
+                        return f.values;
                     });
                 }
             },
@@ -105,12 +105,14 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             name: 'GenericField',
             draw_modes: ['field']
         }));
-        this.db_value = function() {
+        return this;
+    };
+    GenericField.prototype = {
+        db_value: function() {
             var v = this.val();
             return v;
-        };
-        this.get_field_name = function() { return this.constructor.field_name };
-        return this;
+        },
+        get_field_name: function() { return this.constructor.field_name }
     };
     
     function get_field_constructor(field_creation_arg) {

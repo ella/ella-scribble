@@ -11,6 +11,9 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
     EllaObject.prototype = {
         init: function(arg) {
             var vals = {}
+            if ($.isNumeric(arg)) {
+                arg = { id: arg };
+            }
             for (var k in arg) {
                 if (this.fields[k]) {
                     vals[k] = new this.fields[k](arg[k]);
@@ -29,7 +32,7 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
             });
             return rv;
         },
-        _get_data: function() {
+        values: function() {
             var data = {};
             _(this.vals).each(function(v, k) {
                 var val = v.db_value();
@@ -44,7 +47,7 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
         },
         fetch: function() {
             var me = this;
-            var data = me._get_data();
+            var data = me.values();
             $.extend(data, { limit: 0 });
             var promise = new $.Deferred();
             $.ajax({
@@ -82,7 +85,7 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
             .fail(promise.reject);
         },
         save: function() {
-            var data = this._get_data();
+            var data = this.values();
             return $.ajax({
                 type: 'post',
                 url: this._get_api_url(),
