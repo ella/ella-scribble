@@ -4,19 +4,20 @@ define(
         '../Core/Category',
         '../Core/Author',
         '../Core/Source',
+        '../Core/Listing',
         '../Fields'
     ],
-    function(EllaObject, Category, Author, Source, Fields) {
+    function(EllaObject, Category, Author, Source, Listing, Fields) {
         var Article = EllaObject.subclass({
             type: 'article',
             fields: {
-                title:       { type: Fields.text },
-                upper_title: { type: Fields.text },
+                title:       { type: Fields.text     },
+                upper_title: { type: Fields.text     },
                 created:     { type: Fields.datetime },
                 updated:     { type: Fields.datetime },
-                slug:        { type: Fields.text },
-                description: { type: Fields.text },
-                content:     { type: Fields.text },
+                slug:        { type: Fields.text     },
+                description: { type: Fields.text     },
+                content:     { type: Fields.text     },
                 category: {
                     type: Fields.foreign,
                     construction_arg: Category
@@ -31,7 +32,11 @@ define(
                 },
                 publish_from: { type: Fields.datetime },
                 publish_to:   { type: Fields.datetime },
-                url:          { type: Fields.text     }
+                url:          { type: Fields.text     },
+                listings: {
+                    type: Fields.array,
+                    construction_arg: Listing
+                }
             }
         });
         return Article;

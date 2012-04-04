@@ -75,7 +75,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 },
                 db_value: function() {
                     return $.map(this.val(), function(f) {
-                        return f.values;
+                        return f.values();
                     });
                 }
             },
@@ -144,6 +144,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             instantiate_field.prototype = new GenericField();
             instantiate_field.prototype.constructor = instantiate_field;
             instantiate_field.field_name = field_name;
+            instantiate_field.validate_value = get_initial_value;
             return instantiate_field;
         }
         return construct_field;

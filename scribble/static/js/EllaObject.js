@@ -37,7 +37,7 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
             _(this.vals).each(function(v, k) {
                 var val = v.db_value();
                 if (val !== undefined) {
-                    data[k] = v.db_value();
+                    data[k] = val;
                 }
             });
             return data;
@@ -96,7 +96,8 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
         get: function(field_name) {
             return this.vals[field_name].val();
         },
-        set: function(field_name, new_value) {
+        set: function(field_name, new_provided_value) {
+            var new_value = this.fields[field_name].validate_value(new_provided_value);
             if (field_name in this.vals) {
                 var observable = this.vals[field_name].val;
                 var old_value = observable();
