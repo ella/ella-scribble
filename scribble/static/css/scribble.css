@@ -44,3 +44,14 @@ table.table thead .sorting_desc_disabled { background: url('../img/sort_desc_dis
 table.dataTable th:active {
     outline: none;
 }
+
+.editable .Edit {
+    display: none;
+    white-space: nowrap;
+}
+.editable.Editation-active .Edit {
+    display: block;
+}
+.editable.Editation-active .Show {
+    display: none;
+}

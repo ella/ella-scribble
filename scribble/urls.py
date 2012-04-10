@@ -16,6 +16,7 @@ urlpatterns = patterns('',
 
     (r'^$', direct_to_template, {'template': 'index.html'}),
     (r'^articles/$', direct_to_template, {'template': 'articles.html'}),
+    (r'^articles/(?P<id>\d+)$', direct_to_template, {'template': 'article.html'}),
 
     ('^', include('ella.core.urls')),
 

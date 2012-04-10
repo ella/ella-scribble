@@ -1,4 +1,4 @@
-define(['./lib/knockout', './lib/jquery', './lib/underscore'], function(ko) {
+define(['./lib/knockout', './lib/underscore'], function(ko) {
     function _get_mode(mode, drawable) {
         if (mode === undefined) mode = drawable.default_draw_mode;
         if (mode in drawable.legal_draw_modes) {} else {

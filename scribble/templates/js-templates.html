@@ -22,9 +22,33 @@
     </div>
 </script>
 
+<script type="text/html" id="js-template-array-field">
+    <div class="ella-object-field">
+        <label data-bind="text: get_field_name()"></label>
+        <ul data-bind="foreach: val">
+            <li data-bind="template: $data.get_template_id('reference')"></li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/html" id="js-template-foreign-field">
+    <div class="ella-object-field">
+        <label data-bind="text: get_field_name()"></label>
+        <!-- ko with: val() -->
+        <div data-bind="template: $data.get_template_id('reference')"></div>
+        <!-- /ko -->
+    </div>
+</script>
+
 <script type="text/html" id="js-template-Article-tablerow">
     <td><label data-bind="text: $data.get('id')" /></td>
-    <td><a data-bind="attr: {href: $data.get('url')}"><strong data-bind="text: $data.get('title')"></strong></a></td>
+    <td class="editable">
+        <strong data-bind="text: $data.get('title')" class="Show"></strong>
+        <span class="Edit">
+            <input type="text" data-bind="value: $data.get_observable('title')" />
+            <button type="button">&#8629;</button>
+        </span>
+    </td>
     <td><label data-bind="text: $data.get('category').get('title')" /></td>
     <td><label data-bind="text: $data.get('publish_from')" /></td>
     <td><label data-bind="text: $data.get('created')" /></td>
@@ -32,5 +56,6 @@
     <td>
         <button class="btn btn-primary btn-mini">Show</button>
         <button class="btn btn-danger btn-mini">Delete</button>
+        <button class="btn btn-mini" data-bind="click: save">Save</button>
     </td>        
 </script>

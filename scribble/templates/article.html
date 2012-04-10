@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row-fluid"><div class="span12">
+    <h1>Article <span data-bind="text: a.get('title')"></span></h1>
+    <div class="article-detail"></div>
+    <button type="button" data-bind="click: a.save">save</button>
+</div></div>
+{% endblock %}
+
+{% block js %}
+    scribble.load_article();
+{% endblock %}

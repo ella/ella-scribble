@@ -37,14 +37,19 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
     Fields.foreign = (function() {
         var field_constructor = get_field_constructor({
             type: 'foreign',
-            field_fields: {
-                draw: function() {
-                    return this.val().draw('reference');
-                },
-                db_value: function() {
-                    return this.val().values();
-                }
-            },
+            field_fields: $.extend(
+                {
+                    draw: function() {
+                        return this.val().draw('reference');
+                    },
+                    db_value: function() {
+                        return this.val().values();
+                    }
+                }, new Drawable({
+                    name: 'foreign',
+                    draw_modes: ['field']
+                })
+            ),
             get_initial_value: function(arg) {
                 if (('_valid_field_value_type' in this) && arg.constructor === this._valid_field_value_type) {
                     return arg;
@@ -65,20 +70,25 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
     Fields.array = (function() {
         var field_constructor = get_field_constructor({
             type: 'array',
-            field_fields: {
-                draw: function() {
-                    var $ul = $('<ul>');
-                    _(this.val()).each(function(v) {
-                        $ul.append(v.draw('reference'));
-                    });
-                    return $ul;
-                },
-                db_value: function() {
-                    return $.map(this.val(), function(f) {
-                        return f.values();
-                    });
-                }
-            },
+            field_fields: $.extend(
+                {
+                    draw: function() {
+                        var $ul = $('<ul>');
+                        _(this.val()).each(function(v) {
+                            $ul.append(v.draw('reference'));
+                        });
+                        return $ul;
+                    },
+                    db_value: function() {
+                        return $.map(this.val(), function(f) {
+                            return f.values();
+                        });
+                    }
+                }, new Drawable({
+                    name: 'array',
+                    draw_modes: ['field']
+                })
+            ),
             get_initial_value: function(arg) {
                 var arr = $.makeArray(arg);
                 var field = this;
@@ -136,8 +146,14 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             // called at e.g. my_article.vals.title = new my_article.fields.title('Hello world')
             var instantiate_field = function(initial_value) {
                 var me = this;
-                me.val = ko.observable(get_initial_value.call(instantiate_field, initial_value));
                 me.type = field_creation_arg.type;
+                var initial_value = get_initial_value.call(instantiate_field, initial_value);
+                if ($.isArray(initial_value)) {
+                    me.val = ko.observableArray(initial_value);
+                }
+                else {
+                    me.val = ko.observable(initial_value);
+                }
                 $.extend(this, field_creation_arg.field_fields);
                 return me;
             };

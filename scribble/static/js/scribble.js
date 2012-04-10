@@ -3,8 +3,15 @@ define([
     './Core/Author',
     './Core/Source',
     './Core/Category',
-    './Articles/Article'
+    './Articles/Article',
 ], function(User, Author, Source, Category, Article) {
+    $('.editable .Show').live('dblclick', function(evt) {
+        $(evt.target).closest('.editable').addClass('Editation-active');
+    });
+    $('.editable .Edit button').live('click', function(evt) {
+        if (evt.button != 0) return;
+        $(evt.target).closest('.editable').removeClass('Editation-active');
+    });
     return {
         Auth: {
             User: User
@@ -16,7 +23,6 @@ define([
         },
         Articles: {
             Article: Article
-        },
-        I_am_scribble: true
+        }
     };
 });

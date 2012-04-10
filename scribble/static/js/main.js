@@ -1,6 +1,5 @@
 require(
     [
-        './lib/jquery',
         './lib/knockout',
         './lib/underscore',
         './lib/datatables',
@@ -8,28 +7,10 @@ require(
         './lib/datatables/datatables.knockout.bindings',
         './scribble'
     ],
-    function(jq, ko, undersc, dataTables, dtb, dtkob, scribble) {
-        $(document).ready(function() {
-            function DataGridModel() {
-                var self = this;
-                
-                self.data = ko.observableArray([]);
-                
-                self.processData = function (data) {
-                    self.data(data['objects']);
-                };
-                
-                self.getData = function () {
-                    new scribble.Articles.Article().fetch().done( function(objects) {
-                        self.data(objects);
-                    });
-                };
-                
-                self.getData();
-            }
-            
-            ko.applyBindings(new DataGridModel());
-        });
+    function(ko, _undersc, dataTables, dtb, dtkob, scribble) {
+        scribble.load_articles = _.bind(require, this, ['./pages/articles']);
+        scribble.load_article  = _.bind(require, this, ['./pages/article' ]);
         window.scribble = scribble;
+        $(document).trigger('scribble_loaded');
     }
 );

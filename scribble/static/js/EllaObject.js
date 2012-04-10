@@ -1,4 +1,4 @@
-define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/underscore'], function(Drawable, Fields, ko) {
+define(['./Drawable', './Fields', './lib/knockout', './lib/underscore'], function(Drawable, Fields, ko) {
     var EllaObject = function() {
         this.fields = {};
         this.fields.id = new Fields.id();
@@ -83,15 +83,21 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
                 return promise.resolve(objects[0]);
             })
             .fail(promise.reject);
+            return promise;
         },
         save: function() {
-            var data = this.values();
-            return $.ajax({
+            var me = this;
+            var data = me.values();
+            var xhr = $.ajax({
                 type: 'post',
-                url: this._get_api_url(),
+                url: me._get_api_url(),
                 data: JSON.stringify(data),
                 headers: {"Content-Type":"application/json"}
+            })
+            .done(function() {
+                $(document).trigger('ella-object-saved', {obj: me, xhr: xhr});
             });
+            return xhr;
         },
         get: function(field_name) {
             return this.vals[field_name].val();
@@ -108,6 +114,9 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/jquery', './lib/under
                 this.vals[field_name] = new this.fields[field_name](new_value);
                 return null;
             }
+        },
+        get_observable: function(field_name) {
+            return this.vals[field_name].val;
         }
     };
     EllaObject.subclass = function(opt) {
