@@ -54,7 +54,7 @@
     <td><label data-bind="text: $data.get('created')" /></td>
     <td><a target="_blank" class="btn btn-mini" data-bind="attr: { href: $data.get('url'), title: $data.get('title') }"><i class="icon-eye-open"></i> show on page</a></td>
     <td>
-        <button class="btn btn-primary btn-mini">Show</button>
+        <a data-bind="attr: {href: $data.get('id')}" class="btn btn-primary btn-mini">Show</a>
         <button class="btn btn-danger btn-mini">Delete</button>
         <button class="btn btn-mini" data-bind="click: save">Save</button>
     </td>        

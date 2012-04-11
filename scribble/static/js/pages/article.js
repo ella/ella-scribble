@@ -5,9 +5,7 @@ define(['../scribble', '../lib/knockout'], function(scribble, ko) {
     .done(draw_article);
 
     function draw_article(a) {
-        ko.applyBindings({
-            a: a
-        }, $('.article-detail')[0]);
+        ko.applyBindings(a, $('.article-detail')[0]);
         a.draw().appendTo('.article-detail');
     }
 });
