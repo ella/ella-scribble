@@ -3,6 +3,7 @@ from tastypie import fields
 from tastypie.authorization import Authorization
 
 from ella.photos.models import Photo
+from django.contrib.auth.models import User
 from ella.core.models import Publishable, Listing, Category, Author
 from ella.articles.models import Article
 
@@ -22,6 +23,16 @@ class CategoryResource(ModelResource):
             'tree_path'        : ('exact',),
         }
 
+
+class UserResource(ModelResource):
+    class Meta:
+        authorization = Authorization()
+        queryset = User.objects.all()
+        resource_name = 'user'
+        filtering = {
+            'id'               : ('exact',),
+            'username'         : ('exact',),
+        }
 
 class PhotoResource(ModelResource):
     class Meta:
