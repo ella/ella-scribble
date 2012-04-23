@@ -87,20 +87,16 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/underscore'], functio
         },
         save: function() {
             var me = this;
-            var data = me.values();
-            var xhr = $.ajax({
-                type: 'post',
-                url: me._get_api_url(),
-                data: JSON.stringify(data),
-                headers: {"Content-Type":"application/json"}
-            })
-            .done(function() {
-                $(document).trigger('ella-object-saved', {obj: me, xhr: xhr});
-            });
-            return xhr;
+            prepare_for_sending(me)
+            .done(function() { send_object.call(this,me) });
         },
         get: function(field_name) {
-            return this.vals[field_name].val();
+            if (field_name in this.vals) {
+                return this.vals[field_name].val();
+            }
+            else {
+                return undefined;
+            }
         },
         set: function(field_name, new_provided_value) {
             var new_value = this.fields[field_name].validate_value(new_provided_value);
@@ -132,5 +128,33 @@ define(['./Drawable', './Fields', './lib/knockout', './lib/underscore'], functio
         subclass.prototype.constructor = subclass;
         return subclass;
     };
+
+    function prepare_for_sending(obj) {
+        var data = obj.values();
+        var requests = [];
+        _(_(obj.vals).keys()).each(function(key) {
+            var val = obj.get(key);
+            if (val instanceof EllaObject) {
+                if (val.get('id')) return;
+                requests.push( val.save() );
+                return;
+            }
+            if (val instanceof Fields.array) { } //XXX
+        });
+        return $.when.apply($, requests);
+    }
+    function send_object(obj) {
+        var xhr = $.ajax({
+            type: 'post',
+            url: obj._get_api_url(),
+            data: JSON.stringify(obj.values()),
+            headers: {"Content-Type":"application/json"}
+        })
+        .done(function() {
+            $(document).trigger('ella-object-saved', {obj: obj, xhr: xhr});
+        });
+        return xhr;
+    }
+
     return EllaObject;
 });
