@@ -2,8 +2,8 @@ define(['../EllaObject', '../Fields'], function(EllaObject, Fields) {
     var User = EllaObject.subclass({
         type: 'user',
         fields: {
-            username: { type: Fields.text },
-            password: { type: Fields.password }
+            username : new Fields.text(),
+            password : new Fields.password()
         }
     });
     return User;

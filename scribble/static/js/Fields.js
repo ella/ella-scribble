@@ -51,16 +51,21 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 })
             ),
             get_initial_value: function(arg) {
-                if (('_valid_field_value_type' in this) && arg.constructor === this._valid_field_value_type) {
-                    return arg;
+                if ('_valid_field_value_type' in this) {
+                    if (arg.constructor === this._valid_field_value_type) {
+                        return arg;
+                    }
+                    else {
+                        return new this._valid_field_value_type(arg);
+                    }
                 }
                 else {
-                    return new this._valid_field_value_type(arg);
+                    return arg;
                 }
             }
         });
-        // called at e.g. Author.fields.user = new Fields.foreign(User)
-        return function(name, valid_type) {
+        // called at e.g. Author.field_declarations.user = new Fields.foreign(User)
+        return function(valid_type, name) {
             var field_instantiator = field_constructor.apply(this, arguments);
             if (valid_type) field_instantiator._valid_field_value_type = valid_type;
             return field_instantiator;
@@ -103,7 +108,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 return validated_arr;
             }
         });
-        return function(name, valid_type) {
+        return function(valid_type, name) {
             var field_instantiator = field_constructor.apply(this, arguments);
             if (valid_type) field_instantiator._valid_element_type = valid_type;
             return field_instantiator;
@@ -124,10 +129,13 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
         },
         get_field_name: function() { return this.constructor.field_name }
     };
+    Fields._GenericField = GenericField;
     
     function get_field_constructor(field_creation_arg) {
-        // called at e.g. Article.fields.title = new Fields.text()
-        var construct_field = function(field_name, field_construction_arg) {
+        // called at e.g. Article.field_declarations.title = new Fields.text()
+        var construct_field = function(field_construction_arg, field_name) {
+//            if (arguments.length == 0) return this;
+            
             if ('type' in field_creation_arg) {} else {
                 throw 'type must be specified at field creation';
             }
@@ -143,7 +151,7 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
                 get_initial_value = _.identity;
             }
             
-            // called at e.g. my_article.vals.title = new my_article.fields.title('Hello world')
+            // called at e.g. my_article.fields.title = new my_article.field_declarations.title('Hello world')
             var instantiate_field = function(initial_value) {
                 var me = this;
                 me.type = field_creation_arg.type;
@@ -159,11 +167,23 @@ define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, 
             };
             instantiate_field.prototype = new GenericField();
             instantiate_field.prototype.constructor = instantiate_field;
-            instantiate_field.field_name = field_name;
+            if (field_name) instantiate_field.field_name = field_name;
             instantiate_field.validate_value = get_initial_value;
             return instantiate_field;
         }
+        construct_field.typestr = field_creation_arg.type;
+        construct_field.prototype = new GenericField();
+        construct_field.prototype.constructor = construct_field;
         return construct_field;
+    }
+    
+    Fields.get_type_of = function(obj) {
+        if (obj instanceof GenericObject) {} else {
+            return null;
+        }
+        if (obj.type in Fields) {
+            return Fields[obj.type];
+        }
     }
     
     return Fields;
