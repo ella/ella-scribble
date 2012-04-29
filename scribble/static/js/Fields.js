@@ -338,7 +338,14 @@ declaration, which is done by C<EllaObject.subclass>.
 Returns the name of the field type (like I<text> or I<bool>).
 
 */
-        get_type      : function() { return this.constructor.constructor.typestr }
+        get_type: function() { return this.constructor.constructor.typestr },
+        set: function(new_val) {
+            var fd = this.constructor;
+            var validated_val = fd.validate_value(new_val);
+            var old_val = this.val();
+            this.val(validated_val);
+            return old_val;
+        }
     };
     Fields._GenericField = GenericField;
 /*

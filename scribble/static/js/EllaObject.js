@@ -412,10 +412,8 @@ when you try to set a field that is not present in field declarations.
             }
             var new_value = this.field_declarations[field_name].validate_value(new_provided_value);
             if (field_name in this.fields) {
-                var observable = this.fields[field_name].val;
-                var old_value = observable();
-                observable(new_value);
-                return old_value;
+                var field = this.fields[field_name];
+                return field.set(new_value);
             }
             else {
                 this.fields[field_name] = new this.field_declarations[field_name](new_value);
