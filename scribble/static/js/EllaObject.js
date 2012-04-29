@@ -197,12 +197,23 @@ See L<Instantiating EllaObjects>.
             if ($.isNumeric(arg)) {
                 arg = { id: arg };
             }
+            else if (arg instanceof this.constructor) {
+                arg = arg.values();
+            }
+            else if ($.isPlainObject(arg)) { /* OK */ }
+            else {
+                ;;; console.log(
+                    'While initialising', this,
+                    'expected was a plain object, an object of the same type or an ID. Provided was', arg
+                );
+                throw 'Invalid initialisation argument';
+            }
             for (var k in arg) {
                 if (this.field_declarations[k]) {
                     fields[k] = new this.field_declarations[k](arg[k]);
                 }
                 else {
-                    ;;; console.log('warning: unexpected field "' + k + "' while constructing",this);
+                    ;;; console.log('warning: unexpected field "' + k + '" while constructing',this);
                 }
             }
             this.fields = fields;
