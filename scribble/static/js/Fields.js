@@ -15,9 +15,9 @@ Fields -- The various things an EllaObject can have
         TextFieldDeclaration.field_name = 'given_name';
         
         var text_field = new TextFieldDeclaration('Freddie');
-        alert('First name of Mercury is ' + text_field.val());
-        text_field.val('John');
-        alert('First name of Lennon is ' + text_field.val());
+        alert('First name of Mercury is ' + text_field.get());
+        text_field.set('John');
+        alert('First name of Lennon is ' + text_field.get());
 
 
         // define a new Field type 'URL'
@@ -27,14 +27,17 @@ Fields -- The various things an EllaObject can have
                 if (/^www\./.test(arg)) {
                     return 'http://' + arg;
                 }
-                else {
+                else if (/^http:\/\//.test(arg)) {
                     return arg;
+                }
+                else {
+                    throw 'Invalid URL';
                 }
             }
         });
         var UrlFieldDeclaration = new Fields.url();
         var url_field = new UrlFieldDeclaration('www.example.org');
-        location.href = url_field.val();
+        location.href = url_field.get();
         // sends you to http://www.example.org
 
 
@@ -42,19 +45,21 @@ Fields -- The various things an EllaObject can have
         Fields.bracketed = get_field_constructor({
             type: 'bracketed',
             validate_value: function(arg) {
-                                 // stored at field constructor construction
+                                 // stored at field constructor construction (*)
                 var brackets = this.field_construction_arg;
                 return brackets[0] + arg + brackets[1];
             }
         });
         
-        var BracedFieldDeclaration = new Fields.bracketed('{}');
+        var BracedFieldDeclaration = new Fields.bracketed('{}'); // (*)
         var braced_field = new BracedFieldDeclaration('a:1');
-        alert(braced_field.val());  // alerts "{a:1}"
+        alert(braced_field.get());  // alerts "{a:1}"
         
-        var XmlTagFieldDeclaration = new Fields.bracketed('<>');
+        var XmlTagFieldDeclaration = new Fields.bracketed('<>'); // (*)
         var xmltag_field = new XmlTagFieldDeclaration('div');
-        alert(xmltag_field.val());  // alerts "<div>"
+        alert(xmltag_field.get());  // alerts "<div>"
+        xmltag_field.set('span');
+        alert(xmltag_field.get());  // alerts "<span>"
     });
 
 =head1 DESCRIPTION
@@ -165,10 +170,10 @@ will be fed to the constructor and the result will be stored instead.
         field_fields: $.extend(
             {
                 draw: function() {
-                    return this.val().draw('reference');
+                    return this.get().draw('reference');
                 },
                 db_value: function() {
-                    return this.val().values();
+                    return this.get().values();
                 }
             }, new Drawable({
                 name: 'foreign',
@@ -212,13 +217,13 @@ This is in fact declaring the field to be an array of a given type.
             {
                 draw: function() {
                     var $ul = $('<ul>');
-                    _(this.val()).each(function(v) {
+                    _(this.get()).each(function(v) {
                         $ul.append(v.draw('reference'));
                     });
                     return $ul;
                 },
                 db_value: function() {
-                    return $.map(this.val(), function(f) {
+                    return $.map(this.get(), function(f) {
                         return f.values();
                     });
                 }
@@ -253,7 +258,7 @@ I<field instance>. A field has, among other things, a I<value>.
     Fields.text;                                    // a field type
     TextFieldDeclaration = new Fields.text();       // a field declaration
     text_field = new TextFieldDeclaration('Love');  // a field instance
-    text_field.val();                               // a field's value
+    text_field.get();                               // a field's value
 
     // going the chain up:
     text_field.constructor === TextFieldDeclaration
@@ -269,23 +274,28 @@ transform the values. For example, take the C<array> field type:
 
     var atoms = [
         '1986-04-26T01:23+0300',
-        '2011-03-11T05:46+0000'
+        '2011-03-11T14:46+0900'
     ];
     
+    // without parametrisation
     ArrayFieldDecl = new Fields.array();
     plain_array_field = new ArrayFieldDecl(atoms);
-    plain_array_field.val();  // same as atoms array
+    plain_array_field.get();
+    // [ '1986-04-26T01:23+0300', '2011-03-11T14:46+0900' ]
     
+    // with parametrisation
     DateArrayFieldDecl = new Fields.array(Date);
     date_array_field = new DateArrayFieldDecl(atoms);
-    date_array_field.val();
-    // [ new Date('1986-04-26T01:23+0300'), new Date('2011-03-11T05:46+0000') ]
+    date_array_field.get();
+    // [ new Date('1986-04-26T01:23+0300'), new Date('2011-03-11T14:46+0900') ]
 
 In the second paragraph, we declared the C<DateArrayFieldDecl> as
 C<new Fields.array(Date)>, and all fields constructed with this declaration have
 the array elements in the form of Date objects. That's because the parameter to
 the array field type is interpreted as a constructor for array elements of a
-field instance.
+field instance. A parametrized type accepts a parameter at construction of field
+declaration and can use that parameter while constructing field instances at
+will.
 
 =cut
 
@@ -302,7 +312,24 @@ field instance.
 
 =head2 Methods
 
-=over4
+=over 4
+
+=item get
+
+Returns the value stored in the field.
+
+The value as such is actually stored in the C<val> property -- you can equally
+use it as an accessor if you like. But beware that the C<val> property is a
+Knockout observable, so you 1) still have to call it as a function and 2) if you
+accidentally pass an argument to C<val>, you overwrite the value, losing the old
+one and circumventing the validation, so you may also want to stick with C<get>
+and C<set>.
+
+=cut
+
+*/
+        get: function() { return this.val() },
+/*
 
 =item db_value
 
@@ -314,10 +341,7 @@ not correct should override the method.
 =cut
 
 */
-        db_value: function() {
-            var v = this.val();
-            return v;
-        },
+        db_value: function() { return this.val() },
 /*
 
 =item get_field_name
@@ -337,12 +361,32 @@ declaration, which is done by C<EllaObject.subclass>.
 
 Returns the name of the field type (like I<text> or I<bool>).
 
+=cut
+
 */
         get_type: function() { return this.constructor.constructor.typestr },
+/*
+
+=item set
+
+Sets the field's value to the one provided in the argument and returns the
+previous value.
+
+In case the field got a C<validate_value> function at declaration, the provided
+value is fed as argument to this validator and the return value is stored.
+
+To really store what you provided, bypassing validation, you can call C<val>
+directly. But why would you do that?
+
+=back
+
+=cut
+
+*/
         set: function(new_val) {
             var fd = this.constructor;
             var validated_val = fd.validate_value(new_val);
-            var old_val = this.val();
+            var old_val = this.get();
             this.val(validated_val);
             return old_val;
         }
@@ -392,6 +436,54 @@ ignored.
 
 If you provide neither C<validate_value> nor C<default_value>, then the value
 will be left alone and the field will have whatever you provide.
+
+Ad (3): The C<db_value> method of a field should return a string that represents
+the field's value in a manner that the server API understands. If the default
+behavior (simply returning the value) is not appropriate, you should override
+this method.
+
+The overriding of field properties in general is done by specifying a
+C<field_fields> object. In this case:
+
+    field_fields: { db_value: function() { return _transform(this.get()) } }
+
+Ad (4): Ella objects are I<Drawable>, under the C<EllaObject> name. To specify a
+different template, make the field Drawable anew. This can be done by extending
+the C<field_fields> object by C<new Drawable>:
+
+    field_fields: $.extend({...}, new Drawable({
+        name: foo,
+        draw_modes: ['field']
+    }),
+
+Ad (5): Specify any other methods or properties a field of the newly defined
+type should have in the C<field_fields> object.
+
+A complete example:
+
+    Fields.bracketed = get_field_constructor({
+        type: 'bracketed',
+        validate_value: function(arg) {
+            var brackets = this.field_construction_arg;
+            if (!brackets[0] || !brackets[1]) {
+                brackets = '()';
+            }
+            return brackets[0] + arg + brackets[1];
+        },
+        field_fields: $.extend(
+            {
+                db_value: function() { return this.val(); },
+                get_bracketless: function() {
+                    var lbracket = this.field_construction_arg[0];
+                    var rbracket = this.field_construction_arg[1];
+                    return this.val().slice(lbracket.length,-rbracket.length);
+                }
+            }, new Drawable({
+                name: 'bracketed',
+                draw_modes: ['field']
+            })
+        )
+    });
 
 =cut
 
@@ -445,14 +537,36 @@ will be left alone and the field will have whatever you provide.
         construct_field.prototype.constructor = construct_field;
         return construct_field;
     }
-    
+/*
+
+=head2 Checking if Something is a Field
+
+JavaScript does not allow to construct callable objects. Since the field
+definitions return field constructors, the inheritance hierarchy cannot be
+formally kept, so C<article.fields.title instanceof Fields.text> returns
+B<false>.
+
+To compensate for this unfortunate fact, the C<Fields.get_type_of> function is
+provided. It takes as argument any value and in case it is a field instance, it
+returns its type constructor. The type name can then be retrieved via the
+C<typestr> property. If the argument is not a field instance, C<null> is
+returned.
+
+    Fields.get_type_of(1);   // null
+    Fields.get_type_of(article.fields.title);   // Fields.text
+    Fields.get_type_of(article.fields.title).typestr;   // "text"
+
+So instead of C<$thing instanceof Fields.text>, you can write
+C<Fields.get_type_of($thing) === Fields.text>.
+
+=cut
+
+*/
     Fields.get_type_of = function(obj) {
-        if (obj instanceof GenericObject) {} else {
+        if (obj instanceof GenericField) {} else {
             return null;
         }
-        if (obj.type in Fields) {
-            return Fields[obj.get_type()];
-        }
+        return obj.constructor.constructor;
     }
 
     return Fields;
