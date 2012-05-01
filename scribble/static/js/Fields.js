@@ -41,21 +41,25 @@ Fields -- The various things an EllaObject can have
         // sends you to http://www.example.org
 
 
-        // define a new field 'bracketed' with parametrized brackets
+        // define a new field 'bracketed' with parametrised brackets
         Fields.bracketed = get_field_constructor({
             type: 'bracketed',
+            on_declaration: function(brackets) {
+                // 'this' is the constructor of field instances
+                this.lbracket = brackets[0] || '(';
+                this.rbracket = brackets[1] || ')';
+            }
             validate_value: function(arg) {
-                                 // stored at field constructor construction (*)
                 var brackets = this.field_construction_arg;
                 return brackets[0] + arg + brackets[1];
             }
         });
         
-        var BracedFieldDeclaration = new Fields.bracketed('{}'); // (*)
+        var BracedFieldDeclaration = new Fields.bracketed('{}');
         var braced_field = new BracedFieldDeclaration('a:1');
         alert(braced_field.get());  // alerts "{a:1}"
         
-        var XmlTagFieldDeclaration = new Fields.bracketed('<>'); // (*)
+        var XmlTagFieldDeclaration = new Fields.bracketed('<>');
         var xmltag_field = new XmlTagFieldDeclaration('div');
         alert(xmltag_field.get());  // alerts "<div>"
         xmltag_field.set('span');
@@ -180,18 +184,26 @@ will be fed to the constructor and the result will be stored instead.
                 draw_modes: ['field']
             })
         ),
-        validate_value: function(arg) {
-            if (this.field_construction_arg) {
-                var value_constructor = this.field_construction_arg;
-                if (arg.constructor === value_constructor) {
-                    return arg;
+        on_declaration: function(legal_value_type) {
+            if (arguments.length === 0) return;
+            if (!$.isFunction(legal_value_type)) {
+                ;;; console.log('At "foreign" field declaration, constructor expected, got',legal_value_type);
+                throw 'Can only restrict foreign field with a constructor';
+            }
+            this.legal_value_type = legal_value_type;
+        },
+        validate_value: function(new_value) {
+            if ('legal_value_type' in this) {
+                var value_constructor = this.legal_value_type;
+                if (new_value.constructor === value_constructor) {
+                    return new_value;
                 }
                 else {
-                    return new value_constructor(arg);
+                    return new value_constructor(new_value);
                 }
             }
             else {
-                return arg;
+                return new_value;
             }
         }
     });
@@ -232,11 +244,19 @@ This is in fact declaring the field to be an array of a given type.
                 draw_modes: ['field']
             })
         ),
+        on_declaration: function(legal_element_type) {
+            if (arguments.length === 0) return;
+            if (!$.isFunction(legal_element_type)) {
+                ;;; console.log('At "array" field declaration, constructor expected, got',legal_element_type);
+                throw 'Can only restrict array field with a constructor';
+            }
+            this.legal_element_type = legal_element_type;
+        },
         validate_value: function(arg) {
             var arr = $.makeArray(arg);
-            var field = this;
-            if (field.field_construction_arg) {
-                value_constructor = field.field_construction_arg;
+            var field_declaration = this;
+            if ('legal_element_type' in field_declaration) {
+                value_constructor = field_declaration.legal_element_type;
                 var validated_arr = _(arr).map(function(el) {
                     if (el.constructor === value_constructor) {
                         return el;
@@ -264,11 +284,11 @@ I<field instance>. A field has, among other things, a I<value>.
     text_field.constructor === TextFieldDeclaration
     TextFieldDeclaration.constructor === Fields.text
 
-=head2 Parametrized Field Declarations
+=head2 Parametrised Field Declarations
 
 Judging solely from the above section, you may wonder why the declarations
 exists at all -- why not simply write C<text_field = new Fields.text()>? The
-answer lies in parametrized field declarations. When you provide an argument for
+answer lies in parametrised field declarations. When you provide an argument for
 constructing a field declaration, that argument can then be used to validate or
 transform the values. For example, take the C<array> field type:
 
@@ -293,9 +313,12 @@ In the second paragraph, we declared the C<DateArrayFieldDecl> as
 C<new Fields.array(Date)>, and all fields constructed with this declaration have
 the array elements in the form of Date objects. That's because the parameter to
 the array field type is interpreted as a constructor for array elements of a
-field instance. A parametrized type accepts a parameter at construction of field
-declaration and can use that parameter while constructing field instances at
-will.
+field instance. A parametrised type accepts a parameter at construction of field
+declaration and can use that parameter at will.
+
+The foreseen usage is to validate / process the parameter at declaration time,
+save the processed parameter as a property of C<this> and then accesses it at
+instantiation time.
 
 =cut
 
@@ -437,6 +460,16 @@ ignored.
 If you provide neither C<validate_value> nor C<default_value>, then the value
 will be left alone and the field will have whatever you provide.
 
+In case of parametrised field declarations, the given parameter is automatically
+stored as C<field_construction_arg> in the field declaration. The validator can
+therefore access it as C<this.field_construction_arg>. But better still, you can
+validate the given parameter at declaration and store the processed parameter
+under (a) more descriptive name(s).
+
+To process the declaration parameter, specify the C<on_declaration> function. It
+will get the declaration parameter as argument and will be called in the context
+of the declaration (just like C<validate_value>).
+
 Ad (3): The C<db_value> method of a field should return a string that represents
 the field's value in a manner that the server API understands. If the default
 behavior (simply returning the value) is not appropriate, you should override
@@ -463,19 +496,19 @@ A complete example:
 
     Fields.bracketed = get_field_constructor({
         type: 'bracketed',
+        on_declaration: function(brackets) {
+            this.lbracket = brackets[0] || '(';
+            this.rbracket = brackets[1] || ')';
+        },
         validate_value: function(arg) {
-            var brackets = this.field_construction_arg;
-            if (!brackets[0] || !brackets[1]) {
-                brackets = '()';
-            }
-            return brackets[0] + arg + brackets[1];
+            return this.lbracket + arg + this.rbracket;
         },
         field_fields: $.extend(
             {
                 db_value: function() { return this.val(); },
                 get_bracketless: function() {
-                    var lbracket = this.field_construction_arg[0];
-                    var rbracket = this.field_construction_arg[1];
+                    var lbracket = this.constructor.lbracket;
+                    var rbracket = this.constructor.rbracket;
                     return this.val().slice(lbracket.length,-rbracket.length);
                 }
             }, new Drawable({
@@ -489,27 +522,26 @@ A complete example:
 
 */
     function get_field_constructor(field_creation_arg) {
+        if ('type' in field_creation_arg) {} else {
+            throw 'type must be specified at field creation';
+        }
+        if (!_.isString(field_creation_arg.type)) {
+            throw 'field type must be a string';
+        }
+        
+        var validate_value;
+        if ($.isFunction(field_creation_arg.validate_value)) {
+            validate_value = field_creation_arg.validate_value;
+        }
+        else if ('default_value' in field_creation_arg) {
+            validate_value = function(v) { return v || field_creation_arg.default_value; };
+        }
+        else {
+            validate_value = _.identity;
+        }
+        
         // called at e.g. Article.field_declarations.title = new Fields.text()
         var construct_field = function(field_construction_arg, field_name) {
-//            if (arguments.length == 0) return this;
-            
-            if ('type' in field_creation_arg) {} else {
-                throw 'type must be specified at field creation';
-            }
-            if (!_.isString(field_creation_arg.type)) {
-                throw 'field type must be a string';
-            }
-            
-            var validate_value;
-            if ($.isFunction(field_creation_arg.validate_value)) {
-                validate_value = field_creation_arg.validate_value;
-            }
-            else if ('default_value' in field_creation_arg) {
-                validate_value = function(v) { return v || field_creation_arg.default_value; };
-            }
-            else {
-                validate_value = _.identity;
-            }
             
             // called at e.g. my_article.fields.title = new my_article.field_declarations.title('Hello world')
             var instantiate_field = function(initial_value) {
@@ -524,12 +556,20 @@ A complete example:
                 $.extend(this, field_creation_arg.field_fields);
                 return me;
             };
+            
             instantiate_field.prototype = new GenericField();
             instantiate_field.prototype.constructor = instantiate_field;
-            if (field_name) instantiate_field.field_name = field_name;
-            instantiate_field.validate_value = validate_value;
-            instantiate_field.field_construction_arg = field_construction_arg;
             instantiate_field.constructor = construct_field;
+            
+            instantiate_field.validate_value = validate_value;
+            
+            if (field_name) instantiate_field.field_name = field_name;
+            
+            instantiate_field.field_construction_arg = field_construction_arg;
+            if ($.isFunction(field_creation_arg.on_declaration)) {
+                field_creation_arg.on_declaration.call(instantiate_field, field_construction_arg);
+            }
+            
             return instantiate_field;
         }
         construct_field.typestr = field_creation_arg.type;

@@ -76,20 +76,19 @@ actual object constructors.
 An EllaObject has its C<fields> and C<field_declarations>.
 
 Field declarations are defined when EllaObject is subclassed. The field
-declarations are bound to the inheriting constructor and copied over to every
-instance. A field declaration knows what type it is and what are the legal
-values for the field.  Field declarations are constructors of fields. All
-instanes of a specific Ella object have the same field declarations. Unless you
-hack, that is. For example, the C<Article> Ella object has the C<title> field
-declaration of type C<text>. All objects have automatically the C<id> field
-declaration if you use standard construction methods described here.
+declarations are bound to the inheriting constructor. A field declaration knows
+what type it is and what are the legal values for the field.  Field declarations
+are constructors of fields. Field declarations are not properties of instances
+but of constructors. All objects have automatically the C<id> field declaration
+if you use standard construction methods described here.
 
-Fields represent actual values an Ella object can have. A specific article will
-have a specific title, for example. An object should never have a field for
-which it doesn't have a corresponding field declaration. This is enforced if you
-use the provided methods for manipulating the objects but can be circumvented if
-you directly manipulate the properties. This should not be necessary, and if it
-is, maybe you should file a feature request or bug report.
+Fields represent actual values an Ella object can have. Fields are properties of
+field instances. A specific article will have a specific title, for example. An
+object should never have a field for which it doesn't have a corresponding field
+declaration. This is enforced if you use the provided methods for manipulating
+the objects but can be circumvented if you directly manipulate the properties.
+This should not be necessary, and if it is, maybe you should file a feature
+request or bug report.
 
 A field object itself stores more than just its value. It also keeps track of
 its type, of how it can render itself to HTML and other things. The value of the
@@ -103,13 +102,13 @@ For illustration, here is a schema of article Ella object.
 
     scribble.Article
     - is a constructor
+    -> has
+        field_declarations
+        - each is a constructor
     -> returns
         article object
         - instanceof scribble.Article
         - instanceof EllaObject
-        -> has
-            field_declarations
-            - each is a constructor
         -> has
             fields
             - each is constructed with a field_declaration
@@ -167,8 +166,6 @@ constructor:
 
 define(['./Drawable', './Fields', './lib/knockout', './lib/underscore'], function(Drawable, Fields, ko) {
     var EllaObject = function() {
-        this.field_declarations = {};
-        this.field_declarations.id = new Fields.id();
         $.extend(this, new Drawable({
             name: 'EllaObject',
             draw_modes: ['detail', 'reference']
@@ -209,8 +206,8 @@ See L<Instantiating EllaObjects>.
                 throw 'Invalid initialisation argument';
             }
             for (var k in arg) {
-                if (this.field_declarations[k]) {
-                    fields[k] = new this.field_declarations[k](arg[k]);
+                if (this.constructor.field_declarations[k]) {
+                    fields[k] = new this.constructor.field_declarations[k](arg[k]);
                 }
                 else {
                     ;;; console.log('warning: unexpected field "' + k + '" while constructing',this);
@@ -380,7 +377,7 @@ of the Ella object..
             if (field_name in this.fields) {
                 return this.fields[field_name].val();
             }
-            else if (field_name in this.field_declarations) {
+            else if (field_name in this.constructor.field_declarations) {
                 return undefined;
             }
             else {
@@ -397,7 +394,7 @@ Accepts exactly two parameters: 1) The field name and 2) the new value. The
 value is set in the means of calling the Knockout observable with the new value,
 so that UI and dependent variables can be updated properly.
 
-B<Never> assign to the field or to its C<val> property directly unless you
+Do not assign to the field or to its C<val> property directly unless you
 really know what you are doing. It will most likely break stuff.
 
 Returns the old value, or null if the field has not been set before. Explodes
@@ -407,16 +404,16 @@ when you try to set a field that is not present in field declarations.
 
 */
         set: function(field_name, new_provided_value) {
-            if (field_name in this.field_declarations) {} else {
+            if (field_name in this.constructor.field_declarations) {} else {
                 throw new NoSuchKeyError(field_name, this);
             }
-            var new_value = this.field_declarations[field_name].validate_value(new_provided_value);
+            var new_value = this.constructor.field_declarations[field_name].validate_value(new_provided_value);
             if (field_name in this.fields) {
                 var field = this.fields[field_name];
                 return field.set(new_value);
             }
             else {
-                this.fields[field_name] = new this.field_declarations[field_name](new_value);
+                this.fields[field_name] = new this.constructor.field_declarations[field_name](new_value);
                 return null;
             }
         },
@@ -429,8 +426,6 @@ Shortcut for C<ella_object.fields[field_name].val>.
 The only argument is the name of a field. Returns the Knockout observable
 holding the actual value.
 
-=back
-
 =cut
 
 */
@@ -440,7 +435,37 @@ holding the actual value.
     };
 /*
 
-=head2 EllaObject.subclass
+=back
+
+=head2 Non-instance Methods
+
+=over 4
+
+=item declare_field
+
+Add a field declaration to the Ella object constructor.
+
+First argument is the field declaration to add. Second argument is the name
+under which the field will be stored. The name is also stored in the declaration
+under the C<field_name> property.
+
+The function is a method of constructors of EllaObjects.
+
+    scribble.Article.declare_field(
+        'reviewer',
+        new Fields.foreign(scribble.Author)
+    );
+
+=cut
+
+*/
+    function declare_field(name, field_declaration) {
+        this.field_declarations[name] = field_declaration;
+        field_declaration.field_name = name;
+    };
+/*
+
+=item EllaObject.subclass
 
 The factory for defining new Ella objects.
 
@@ -474,6 +499,13 @@ declarations outside the C<EllaObject.subclass> function.
 =cut
 
 */
+    var EllaObject_subclass_prototype = {
+        field_declarations: {
+            id: new Fields.id()
+        },
+        declare_field: declare_field,
+        prototype: new EllaObject()
+    };
     EllaObject.subclass = function(opt) {
         if ('type' in opt) {} else {
             ;;; console.log('Wrong parameter to EllaObject:', opt);
@@ -487,19 +519,20 @@ declarations outside the C<EllaObject.subclass> function.
             var me = this;
             
             me.object_type = opt.type;
-            
-            var fd = me.field_declarations;
-            _(opt.fields).each( function(field, name) {
-                fd[name] = field;
-                field.field_name = name;
-            });
             return me.init(arg);
         };
-        subclass.prototype = new EllaObject();
+        $.extend(subclass, EllaObject_subclass_prototype);
         subclass.prototype.constructor = subclass;
+        
+        _(opt.fields).each( function(field, name) {
+            subclass.declare_field(name, field);
+        });
+        
         return subclass;
     };
 /*
+
+=back
 
 =head2 Internal functions
 
