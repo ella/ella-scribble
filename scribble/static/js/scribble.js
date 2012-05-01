@@ -8,8 +8,9 @@ define([
     './EllaObject/Site',
 
     './EllaObject',
-    './Fields'
-], function(User, Author, Source, Category, Article, Listing, Site,  EllaObject, Fields) {
+    './Fields',
+    './Drawable'
+], function(User, Author, Source, Category, Article, Listing, Site,  EllaObject, Fields, Drawable) {
     $('.editable .Show').live('dblclick', function(evt) {
         $(evt.target).closest('.editable').addClass('Editation-active');
     });
@@ -27,7 +28,8 @@ define([
         Site: Site,
         
         _EllaObject: EllaObject,
-        _Fields: Fields
+        _Fields: Fields,
+        _Drawable: Drawable
     };
 });
 
