@@ -191,7 +191,10 @@ See L<Instantiating EllaObjects>.
 */
         init: function(arg) {
             var fields = {}
-            if ($.isNumeric(arg)) {
+            if (arg === undefined) {
+                arg = {};
+            }
+            else if ($.isNumeric(arg)) {
                 arg = { id: arg };
             }
             else if (arg instanceof this.constructor) {

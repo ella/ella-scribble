@@ -9,7 +9,7 @@ define(['../lib/knockout', '../scribble'], function(ko, scribble) {
         };
         
         self.getData = function () {
-            new scribble.Articles.Article().fetch().done( function(objects) {
+            new scribble.Article().fetch().done( function(objects) {
                 self.data(objects);
             });
         };

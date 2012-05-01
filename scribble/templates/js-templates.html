@@ -1,7 +1,7 @@
 <script type="text/html" id="js-template-EllaObject-detail">
     <div class="ella-object-detail">
         <p>EllaObject detail <span data-bind="text: object_type"></span></p>
-        <ul class="Fields" data-bind="foreach: vals_array()">
+        <ul class="Fields" data-bind="foreach: fields_array()">
             <li data-bind="template: $data.get_template_id()"></li>
         </ul>
     </div>
