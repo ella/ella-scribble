@@ -21,7 +21,7 @@ Fields -- The various things an EllaObject can have
 
 
         // define a new Field type 'URL'
-        Fields.url = get_field_constructor({
+        Fields.url = define_field_type({
             type: 'url',    // mandatory
             validate_value: function(arg) {
                 if (/^www\./.test(arg)) {
@@ -42,7 +42,7 @@ Fields -- The various things an EllaObject can have
 
 
         // define a new field 'bracketed' with parametrised brackets
-        Fields.bracketed = get_field_constructor({
+        Fields.bracketed = define_field_type({
             type: 'bracketed',
             on_declaration: function(brackets) {
                 // 'this' is the constructor of field instances
@@ -50,7 +50,7 @@ Fields -- The various things an EllaObject can have
                 this.rbracket = brackets[1] || ')';
             }
             validate_value: function(arg) {
-                var brackets = this.field_construction_arg;
+                var brackets = this.field_declaration_parameter;
                 return brackets[0] + arg + brackets[1];
             }
         });
@@ -89,7 +89,7 @@ are required, they should be added directly here.
 define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, ko) {
     var Fields = {};
     
-    Fields.text = get_field_constructor({
+    Fields.text = define_field_type({
         default_value: '',
         type: 'text'
     });
@@ -102,7 +102,7 @@ Represents a true/false value
 =cut
 
 */
-    Fields.bool = get_field_constructor({
+    Fields.bool = define_field_type({
         validate_value: function(arg) {
             if (arg !== undefined) {
                 arg = !!arg;
@@ -120,7 +120,7 @@ Represents an Ella object's primary key
 =cut
 
 */
-    Fields.id = get_field_constructor({
+    Fields.id = define_field_type({
         type: 'id'
     });
 /*
@@ -130,7 +130,7 @@ Represents an Ella object's primary key
 =cut
 
 */
-    Fields.password = get_field_constructor({
+    Fields.password = define_field_type({
         default_value: '',
         type: 'password'
     });
@@ -141,7 +141,7 @@ Represents an Ella object's primary key
 =cut
 
 */
-    Fields.json = get_field_constructor({
+    Fields.json = define_field_type({
         default_value: '{}',
         type: 'json'
     });
@@ -153,7 +153,7 @@ Represents an Ella object's primary key
 
 */
 
-    Fields.datetime = get_field_constructor({
+    Fields.datetime = define_field_type({
         type: 'datetime'
     });
 /*
@@ -169,7 +169,7 @@ will be fed to the constructor and the result will be stored instead.
 =cut
 
 */
-    Fields.foreign = get_field_constructor({
+    Fields.foreign = define_field_type({
         type: 'foreign',
         field_fields: $.extend(
             {
@@ -223,7 +223,7 @@ This is in fact declaring the field to be an array of a given type.
 =cut
 
 */
-    Fields.array = get_field_constructor({
+    Fields.array = define_field_type({
         type: 'array',
         field_fields: $.extend(
             {
@@ -372,7 +372,8 @@ not correct should override the method.
 Returns the name under which the field is stored within an Ella object.
 
 The name must have been stored to the field_name property of the field
-declaration, which is done by C<EllaObject.subclass>.
+declaration, which is done automatically if you bind the field to an Ella object
+with C<EllaObject.subclass> or C<EllaObject_subclass.declare_field>.
 
 =cut
 
@@ -419,10 +420,9 @@ directly. But why would you do that?
 
 =head2 Defining New Field Types
 
-New field types are defined using the C<get_field_constructor> function. This
-function is enclosed in the package, so you can only call it here within. Its
-return value is the new field type. The only parameter is an object describing
-the new type.
+New field types are defined using the C<define_field_type> function. This function is
+enclosed in the package, so you can only call it here within. Its return value
+is the new field type. The only parameter is an object describing the new type.
 
 To describe the new type, you must specify:
 
@@ -461,8 +461,8 @@ If you provide neither C<validate_value> nor C<default_value>, then the value
 will be left alone and the field will have whatever you provide.
 
 In case of parametrised field declarations, the given parameter is automatically
-stored as C<field_construction_arg> in the field declaration. The validator can
-therefore access it as C<this.field_construction_arg>. But better still, you can
+stored as C<field_declaration_parameter> in the field declaration. The validator can
+therefore access it as C<this.field_declaration_parameter>. But better still, you can
 validate the given parameter at declaration and store the processed parameter
 under (a) more descriptive name(s).
 
@@ -494,7 +494,7 @@ type should have in the C<field_fields> object.
 
 A complete example:
 
-    Fields.bracketed = get_field_constructor({
+    Fields.bracketed = define_field_type({
         type: 'bracketed',
         on_declaration: function(brackets) {
             this.lbracket = brackets[0] || '(';
@@ -521,61 +521,63 @@ A complete example:
 =cut
 
 */
-    function get_field_constructor(field_creation_arg) {
-        if ('type' in field_creation_arg) {} else {
+    function define_field_type(field_type_description) {
+        if ('type' in field_type_description) {} else {
             throw 'type must be specified at field creation';
         }
-        if (!_.isString(field_creation_arg.type)) {
+        if (!_.isString(field_type_description.type)) {
             throw 'field type must be a string';
         }
         
         var validate_value;
-        if ($.isFunction(field_creation_arg.validate_value)) {
-            validate_value = field_creation_arg.validate_value;
+        if ($.isFunction(field_type_description.validate_value)) {
+            validate_value = field_type_description.validate_value;
         }
-        else if ('default_value' in field_creation_arg) {
-            validate_value = function(v) { return v || field_creation_arg.default_value; };
+        else if ('default_value' in field_type_description) {
+            validate_value = function(v) { return v || field_type_description.default_value; };
         }
         else {
             validate_value = _.identity;
         }
         
         // called at e.g. Article.field_declarations.title = new Fields.text()
-        var construct_field = function(field_construction_arg, field_name) {
+        var field_definition = function(field_declaration_parameter, field_name) {
             
             // called at e.g. my_article.fields.title = new my_article.field_declarations.title('Hello world')
-            var instantiate_field = function(initial_value) {
+            var field_declaration = function(initial_value) {
                 var me = this;
-                var initial_value = validate_value.call(instantiate_field, initial_value);
+                var initial_value = validate_value.call(field_declaration, initial_value);
                 if ($.isArray(initial_value)) {
                     me.val = ko.observableArray(initial_value);
                 }
                 else {
                     me.val = ko.observable(initial_value);
                 }
-                $.extend(this, field_creation_arg.field_fields);
                 return me;
             };
             
-            instantiate_field.prototype = new GenericField();
-            instantiate_field.prototype.constructor = instantiate_field;
-            instantiate_field.constructor = construct_field;
+            field_declaration.prototype = $.extend(
+                new GenericField(),
+                field_type_description.field_fields
+            );
+            field_declaration.prototype.constructor = field_declaration;
+            field_declaration.constructor = field_definition;
             
-            instantiate_field.validate_value = validate_value;
+            field_declaration.validate_value = validate_value;
             
-            if (field_name) instantiate_field.field_name = field_name;
+            if (field_name) field_declaration.field_name = field_name;
             
-            instantiate_field.field_construction_arg = field_construction_arg;
-            if ($.isFunction(field_creation_arg.on_declaration)) {
-                field_creation_arg.on_declaration.call(instantiate_field, field_construction_arg);
+            field_declaration.field_declaration_parameter = field_declaration_parameter;
+            if ($.isFunction(field_type_description.on_declaration)) {
+                field_type_description.on_declaration.call(field_declaration, field_declaration_parameter);
             }
             
-            return instantiate_field;
+            return field_declaration;
         }
-        construct_field.typestr = field_creation_arg.type;
-        construct_field.prototype = new GenericField();
-        construct_field.prototype.constructor = construct_field;
-        return construct_field;
+        field_definition.typestr = field_type_description.type;
+        field_definition.prototype = new GenericField();
+        field_definition.prototype.constructor = field_definition;
+        return field_definition;
     }
 /*
 
