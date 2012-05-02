@@ -111,7 +111,7 @@ with templates, whose IDs are:
 
 
 
-You can then draw the object in any of the modes, which will return a div
+You can then `draw`_ the object in any of the modes, which will return a div
 with the expanded template in it. The Knockout model binding for the template
 expansion is the object itself, so you can refer to its properties simply by
 their names and to the object itself under the \ ``$data``\  identifier.

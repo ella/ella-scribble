@@ -64,7 +64,7 @@ periodical may want to manipulate, such as articles.
 
 Scribble is written using Require, jQuery, Knockout and Underscore libraries.
 The \ ``require``\  library enables Scribble and all of its descendant objects to be
-defined using \ ``amd``\  -- asynchronous module definition. See Loading Scribble.
+defined using \ ``amd``\  -- asynchronous module definition. See `Loading Scribble`_.
 
 The Scribble object encapsulates the individual Ella objects -- article, author
 etc. For a complete list, see \ ``_(scribble).keys()``\  or look into the
