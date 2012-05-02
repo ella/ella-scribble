@@ -70,7 +70,7 @@ EllaObject -- The parent class for Ella Objects
 =head1 DESCRIPTION
 
 EllaObject is a de-facto abstract class, i.e. you're not supposed to call the
-constructor directly. Instead, use the L<EllaObject.subclass> method to create
+constructor directly. Instead, use the L</EllaObject.subclass> method to create
 actual object constructors.
 
 An EllaObject has its C<fields> and C<field_declarations>.
@@ -95,8 +95,8 @@ its type, of how it can render itself to HTML and other things. The value of the
 field is stored in its C<val> property and it is stored as a Knockout
 observable. Hence, to access the value itself, having a field C<f>, you have to
 call C<f.val()>. To save you from having to say e.g.
-C<article.fields.title.val()> all the time, the L<get> and L<set>methods are
-provided as illustrated in the L<SYNOPSIS>.
+C<article.fields.title.val()> all the time, the L</get> and L</set>methods are
+provided as illustrated in the L</SYNOPSIS>.
 
 For illustration, here is a schema of article Ella object.
 
@@ -131,7 +131,7 @@ object is merely a foreign field of another Ella object.
 
 =head2 Instantiating EllaObjects
 
-An object subclassed from EllaObject using L<EllaObject.subclass> is a
+An object subclassed from EllaObject using L</EllaObject.subclass> is a
 constructor (i.e. a function) on its own. Use this constructor with the C<new>
 keyword to instantiate an object. The only parameter to the constructor is the
 object with the initial values of the object's fields.
@@ -184,7 +184,7 @@ The only argument is the object defining the values for individual fields.
 Alternatively, if the argument is numeric, it is interpreted as if it were
 C<{id: $n}> (with C<$n> being the numeric argument).
 
-See L<Instantiating EllaObjects>.
+See L</Instantiating EllaObjects>.
 
 =cut
 
@@ -244,7 +244,7 @@ sending it to backend.
 
 =item fields_array
 
-Like L<values>, except the values are not in a plain object but in an array of
+Like L</values>, except the values are not in a plain object but in an array of
 {name: ..., value: ...} object instead. Handy for iterating through the values
 with the C<foreach> directive of Knockout.
 
@@ -270,7 +270,7 @@ Fetches matching objects from backend.
 Sends an ajax request for all objects of the same type as the given instance
 (e.g. new scribble.Article().fetch() fetches Articles) filtered by all columns.
 Precisely said, all objects are fetched that have the same field values like
-what you get using the L<values> method.
+what you get using the L</values> method.
 
 Returned is a jQuery promise object, so you can attach C<.done()>, C<.fail()>
 and C<.then()> callbacks on it, even after the fetching has completed. The
@@ -310,7 +310,7 @@ The filtering functionality is ensured by the backend.
 Updates the JavaScript version of the object to match its backend counterpart.
 
 
-This method is similar to L<fetch> in the respect that it reaches for the
+This method is similar to L</fetch> in the respect that it reaches for the
 matching object to the server. In contrast to C<fetch>, though, this method will
 only succeed when exactly one object is found. Therefore, it is advisable to
 call this method on objects that have a unique field set, like ID or slug. When
@@ -549,7 +549,7 @@ Category and Authors), and saves those that do not have an ID.
 Return value is a promise object that will resolve when all the nested objects
 have been saved.
 
-This function is called automatically by L<save>.
+This function is called automatically by L</save>.
 
 The rationale for this functionality is that when you want to save an object to
 the database, all the related objects must already be present. The

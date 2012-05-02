@@ -83,7 +83,7 @@ periodical may want to manipulate, such as articles.
 
 Scribble is written using Require, jQuery, Knockout and Underscore libraries.
 The C<require> library enables Scribble and all of its descendant objects to be
-defined using C<amd> -- asynchronous module definition. See L<Loading Scribble>.
+defined using C<amd> -- asynchronous module definition. See L</Loading Scribble>.
 
 The Scribble object encapsulates the individual Ella objects -- article, author
 etc. For a complete list, see C<_(scribble).keys()> or look into the
