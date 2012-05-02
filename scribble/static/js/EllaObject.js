@@ -95,7 +95,7 @@ its type, of how it can render itself to HTML and other things. The value of the
 field is stored in its C<val> property and it is stored as a Knockout
 observable. Hence, to access the value itself, having a field C<f>, you have to
 call C<f.val()>. To save you from having to say e.g.
-C<article.fields.title.val()> all the time, the L</get> and L</set>methods are
+C<article.fields.title.val()> all the time, the L</get> and L</set> methods are
 provided as illustrated in the L</SYNOPSIS>.
 
 For illustration, here is a schema of article Ella object.

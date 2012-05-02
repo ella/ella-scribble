@@ -111,7 +111,7 @@ its type, of how it can render itself to HTML and other things. The value of the
 field is stored in its \ ``val``\  property and it is stored as a Knockout
 observable. Hence, to access the value itself, having a field \ ``f``\ , you have to
 call \ ``f.val()``\ . To save you from having to say e.g.
-\ ``article.fields.title.val()``\  all the time, the `get`_ and `set`_methods are
+\ ``article.fields.title.val()``\  all the time, the `get`_ and `set`_ methods are
 provided as illustrated in the `SYNOPSIS`_.
 
 For illustration, here is a schema of article Ella object.
