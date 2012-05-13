@@ -87,7 +87,7 @@
         });
         
         test('EllaObject backend', function() {
-            expect(11);
+            expect(13);
             stop(6);
             var testuser = new scribble.User({ username: '_test_user' });
             
@@ -116,11 +116,15 @@
                 var testuser2 = new scribble.User({ username: '_test_user2' });
                 testuser2.save();
                 testuser.save()
-                .done(function() {
+                .done(function(data) {
                     ok(true, 'test object saved');
+                    ok(testuser.get('id'), 'object got an id by saving');
+                    equal(testuser.get('username'), data.username, 'save received object with matching field');
                 })
                 .fail(function() {
                     ok(false, 'test object saved');
+                    ok(false, 'object got an id by saving');
+                    ok(false, 'save received object with matching field');
                 })
                 .then(function() {
                     start();

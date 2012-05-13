@@ -354,15 +354,31 @@ Any nested objects (like in C<foreign> or C<array> fields) are recursively sent
 along. If any such object does not have ID, it is saved first and the operation
 waits until all such nested objects have been saved themselves.
 
+The ID of the object is updated to that from the server response.
+
 =cut
 
 */
         save: function() {
             var me = this;
-            return $.when(
+            var promise = new $.Deferred();
+            $.when(
                 prepare_for_sending(me)
-                .done(function() { send_object.call(this,me) })
+                .done(function() {
+                    send_object.call(this,me)
+                    .done( function(data) {
+                        if ('id' in data) {
+                            me.set('id', data.id);
+                            promise.resolve(data);
+                        }
+                        else {
+                            ;;; console.log('what save received from backend:',data);
+                            throw 'ellaObject.save() did not get an object with ID from backend';
+                        }
+                    });
+                })
             );
+            return promise;
         },
 /*
 

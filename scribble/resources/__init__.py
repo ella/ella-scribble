@@ -9,6 +9,7 @@ from ella.articles.models import Article
 
 class CategoryResource(ModelResource):
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = Category.objects.all()
         filtering = {
@@ -26,6 +27,7 @@ class CategoryResource(ModelResource):
 
 class UserResource(ModelResource):
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = User.objects.all()
         resource_name = 'user'
@@ -36,6 +38,7 @@ class UserResource(ModelResource):
 
 class PhotoResource(ModelResource):
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = Photo.objects.all()
         resource_name = 'photo'
@@ -58,6 +61,7 @@ class PhotoResource(ModelResource):
 
 class ListingResource(ModelResource):
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = Listing.objects.all()
         filtering = {
@@ -71,6 +75,7 @@ class ListingResource(ModelResource):
 
 class AuthorResource(ModelResource):
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = Author.objects.all()
         filtering = {
@@ -91,6 +96,7 @@ class PublishableResource(ModelResource):
     category = fields.ForeignKey(CategoryResource, 'category', full=True)
 
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = Publishable.objects.all()
         resource_name = 'publishable'
@@ -120,6 +126,7 @@ class PublishableResource(ModelResource):
 class ArticleResource(PublishableResource):
 
     class Meta:
+        always_return_data = True
         authorization = Authorization()
         queryset = Article.objects.all()
         resource_name = 'article'
