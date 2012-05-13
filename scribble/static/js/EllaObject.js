@@ -359,9 +359,32 @@ waits until all such nested objects have been saved themselves.
 */
         save: function() {
             var me = this;
-            prepare_for_sending(me)
-            .done(function() { send_object.call(this,me) });
+            return $.when(
+                prepare_for_sending(me)
+                .done(function() { send_object.call(this,me) })
+            );
         },
+/*
+
+=item delete
+
+Deletes the object from the database, keeping the JavaScript instance intact.
+
+Sends (and returns) a XHR to delete all mathing objects from the backend.
+
+=cut
+
+*/
+        delete: function() {
+            var me = this;
+            var data = me.values();
+            return $.ajax({
+                type: 'DELETE',
+                url: me._get_api_url(),
+                data: data
+            });
+        },
+
 /*
 
 =item get
@@ -520,10 +543,10 @@ declarations outside the C<EllaObject.subclass> function.
             var me = this;
             
             me.object_type = opt.type;
+            me.constructor = subclass;
             return me.init(arg);
         };
         $.extend(subclass, EllaObject_subclass_prototype);
-        subclass.prototype.constructor = subclass;
         
         subclass.declare_field('id', new Fields.id());
         _(opt.fields).each( function(field, name) {

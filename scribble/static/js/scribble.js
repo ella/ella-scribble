@@ -19,17 +19,17 @@ define([
         $(evt.target).closest('.editable').removeClass('Editation-active');
     });
     return {
-        User: User,
-        Author: Author,
-        Source: Source,
+        User:     User,
+        Author:   Author,
+        Source:   Source,
         Category: Category,
-        Article: Article,
-        Listing: Listing,
-        Site: Site,
+        Article:  Article,
+        Listing:  Listing,
+        Site:     Site,
         
         _EllaObject: EllaObject,
-        _Fields: Fields,
-        _Drawable: Drawable
+        _Fields:     Fields,
+        _Drawable:   Drawable
     };
 });
 
