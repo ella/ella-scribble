@@ -18,6 +18,8 @@ urlpatterns = patterns('',
     (r'^articles/$', direct_to_template, {'template': 'articles.html'}),
     (r'^articles/(?P<id>\d+)$', direct_to_template, {'template': 'article.html'}),
 
+    (r'^test/', direct_to_template, {'template': 'test.html'}),
+
     ('^', include('ella.core.urls')),
 
 ) + staticfiles_urlpatterns()
