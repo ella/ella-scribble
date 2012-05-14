@@ -223,6 +223,80 @@
             var testuser = new scribble.User({foo: 'bar'});
             equal(testuser.get('foo'), 'bar', 'declared field present');
         });
+
+
+        module('Fields');
+        
+        test('Fields.text', function() {
+            expect(10);
+            var Fields = scribble._Fields;
+            var fd = new Fields.text(); // field declaration
+            var fi = new fd('foo');     // field instance
+            strictEqual(fi.constructor, fd, 'field instance constructor is field declaration');
+            equal(fi.val(), 'foo', 'val() as getter');
+            fi.val('bar');
+            equal(fi.val(), 'bar', 'val() as setter');
+            equal(fi.get(), 'bar', 'get()');
+            equal(fi.set('foo'), 'bar', 'set() returns previous value');
+            equal(fi.get(), 'foo', 'set()');
+            equal(typeof(fi.drawable), 'object', 'field isa Drawable');
+            equal(fi.db_value(), 'foo', 'text serializes to its value');
+            equal(fi.get_type(), 'text', 'get_type()');
+            
+            var u = new scribble.User({username: 'johndoe'});
+            equal(u.fields.username.get_field_name(), 'username', 'get_field_name()')
+        });
+        
+        test('Fields.bool', function() {
+            expect(2);
+            var Fields = scribble._Fields;
+            var fd = new Fields.bool();
+            var fi = new fd(1);
+            strictEqual(fi.get(), true, 'Value converted to boolean upon construction');
+            fi.set(null);
+            strictEqual(fi.get(), false, 'Value converted to boolean upon set');
+        });
+        
+        test('Fields.json', function() {
+            expect(4);
+            var Fields = scribble._Fields;
+            var fd = new Fields.json();
+            var fi = new fd();
+            equal(fi.get(), '{}', 'JSON defaults to {}');
+            raises(function() { fi.set('}{') }, 'Invalid JSON throws error');
+            raises(function() { fi.set({}) }, 'Non-string rejected');
+            json = '{"a":1, "b":"bb"}';
+            fi.set(json);
+            equal(fi.get(), json, 'Valid JSON string accepted');
+        });
+        
+        test('Fields.datetime', function() {
+            expect(3);
+            var Fields = scribble._Fields;
+            var fd = new Fields.datetime();
+            var time = 1234567890123
+            var fi = new fd(time);
+            equal(fi.get().getTime(), time, 'Milliseconds since epoch accepted');
+            var d = new Date();
+            fi.set(d);
+            equal(fi.get().getTime(), d.getTime(), 'Date object accepted');
+            raises(function() { fi.set('bla') }, 'Invalid datestring rejected');
+        });
+        
+        test('Fields.foreign', function() {
+            expect(4);
+            var Fields = scribble._Fields;
+            var fd = new Fields.foreign();
+            var user = new scribble.User(2);
+            var fi = new fd(user);
+            equal(fi.get().get('id'), 2, 'Unparametrized foreign accepted an ella object');
+            fd = new Fields.foreign(scribble.User);
+            fi = new fd(user);
+            equal(fi.get().get('id'), 2, 'Parametrized foreign accepted a matching ella object');
+            raises(function() { fi.set(new scribble.Article) }, 'Parametrized foreign rejected non-matching ella object');
+            fi.set(5);
+            equal(fi.get().object_type, 'user', 'Parametrized foreign created matching object');
+        });
         
     </script>
 </body>

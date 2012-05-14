@@ -89,6 +89,15 @@ are required, they should be added directly here.
 define(['./Drawable', './lib/knockout', './lib/underscore'], function(Drawable, ko) {
     var Fields = {};
     
+/*
+
+=item text
+
+Represents a textual value (a string)
+
+=cut
+
+*/
     Fields.text = define_field_type({
         default_value: '',
         type: 'text'
@@ -142,8 +151,17 @@ Represents an Ella object's primary key
 
 */
     Fields.json = define_field_type({
-        default_value: '{}',
-        type: 'json'
+        type: 'json',
+        validate_value: function(json) {
+            if (json === undefined) {
+                return '{}';
+            }
+            if (!_.isString(json)) {
+                throw 'JSON field only accepts values of JSON strings';
+            }
+            $.parseJSON(json);
+            return json;
+        }
     });
 /*
 
@@ -154,7 +172,18 @@ Represents an Ella object's primary key
 */
 
     Fields.datetime = define_field_type({
-        type: 'datetime'
+        type: 'datetime',
+        validate_value: function(val) {
+            if ( _.isDate(val) ) return val;
+            else {
+                var date = new Date(val);
+                if (_.isNaN(date.getTime())) {
+                    ;;; console.log('Invalid date:',val);
+                    throw 'Invalid date';
+                }
+                else return date;
+            }
+        }
     });
 /*
 
@@ -185,7 +214,7 @@ will be fed to the constructor and the result will be stored instead.
             })
         ),
         on_declaration: function(legal_value_type) {
-            if (arguments.length === 0) return;
+            if (legal_value_type === undefined) return;
             if (!$.isFunction(legal_value_type)) {
                 ;;; console.log('At "foreign" field declaration, constructor expected, got',legal_value_type);
                 throw 'Can only restrict foreign field with a constructor';
