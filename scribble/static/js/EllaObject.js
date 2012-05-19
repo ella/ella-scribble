@@ -542,7 +542,6 @@ declarations outside the C<EllaObject.subclass> function.
 
 */
     var EllaObject_subclass_prototype = {
-        field_declarations: {},
         declare_field: declare_field,
         prototype: new EllaObject()
     };
@@ -562,7 +561,7 @@ declarations outside the C<EllaObject.subclass> function.
             me.constructor = subclass;
             return me.init(arg);
         };
-        $.extend(subclass, EllaObject_subclass_prototype);
+        $.extend(subclass, EllaObject_subclass_prototype, {field_declarations: {}});
         
         subclass.declare_field('id', new Fields.id());
         _(opt.fields).each( function(field, name) {

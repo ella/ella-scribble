@@ -287,3 +287,19 @@ test('Fields.array', function() {
     deepEqual(fi.get()[0].values(), {username: 'johndoe'}, 'Array of matching objects accepted');
     deepEqual(fi.db_value(), [{username: 'johndoe'}], 'Serialisation');
 });
+
+
+module('Ella objects');
+
+test('Article', function() {
+    expect(1);
+    var A = scribble.Article;
+    deepEqual(
+        _.keys(A.field_declarations).sort(),
+        [
+            'title', 'upper_title', 'created', 'updated', 'slug',
+            'description', 'content', 'category', 'authors', 'source',
+            'publish_from', 'publish_to', 'url', 'listings', 'id'
+        ].sort()
+    );
+});
