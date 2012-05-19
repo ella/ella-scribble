@@ -197,7 +197,7 @@ See L</Instantiating EllaObjects>.
             else if ($.isNumeric(arg)) {
                 arg = { id: arg };
             }
-            else if (arg instanceof this.constructor) {
+            else if (arg.constructor === this.constructor) {
                 arg = arg.values();
             }
             else if ($.isPlainObject(arg)) { /* OK */ }
