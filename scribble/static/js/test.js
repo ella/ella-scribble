@@ -292,7 +292,7 @@ test('Fields.array', function() {
 module('Ella objects');
 
 test('Article', function() {
-    expect(1);
+    expect(3);
     var A = scribble.Article;
     deepEqual(
         _.keys(A.field_declarations).sort(),
@@ -300,6 +300,41 @@ test('Article', function() {
             'title', 'upper_title', 'created', 'updated', 'slug',
             'description', 'content', 'category', 'authors', 'source',
             'publish_from', 'publish_to', 'url', 'listings', 'id'
-        ].sort()
+        ].sort(),
+        'Field declarations list matches'
     );
+    var arg = {
+        title: 'Maw the Lawn',
+        upper_title: "Don't Mawn the Lawn",
+        created: '2012-05-18T12:00+0200',
+        updated: '2012-05-18T16:00+0200',
+        slug: 'maw-the-lawn',
+        description: 'An instructive article about lawn mawing',
+        content: 'Excuse me sir, would you be so kind to maw the lawn, please?',
+        category: 1,
+        authors: [1,2],
+        source: 1,
+        publish_from: '2012-05-20',
+        publish_to: '2012-05-25',
+        url: 'http://example.com/articles/maw-the-lawn',
+        listings: [1,2]
+    };
+    var a = new A(arg);
+    deepEqual(a.values(), $.extend(arg, {
+        created: new Date(arg.created).toJSON(),
+        updated: new Date(arg.updated).toJSON(),
+        category: new scribble.Category(1).values(),
+        authors: [
+            new scribble.Author(1).values(),
+            new scribble.Author(2).values()
+        ],
+        source: new scribble.Source(1).values(),
+        publish_from: new Date(arg.publish_from).toJSON(),
+        publish_to: new Date(arg.publish_to).toJSON(),
+        listings: [
+            new scribble.Listing(1).values(),
+            new scribble.Listing(2).values()
+        ]
+    }), 'Fields set correctly');
+    equal(a.object_type, 'article', 'Object type matches');
 });
