@@ -274,7 +274,7 @@ This is in fact declaring the field to be an array of a given type.
             })
         ),
         on_declaration: function(legal_element_type) {
-            if (arguments.length === 0) return;
+            if (legal_element_type === undefined) return;
             if (!$.isFunction(legal_element_type)) {
                 ;;; console.log('At "array" field declaration, constructor expected, got',legal_element_type);
                 throw 'Can only restrict array field with a constructor';
@@ -284,14 +284,18 @@ This is in fact declaring the field to be an array of a given type.
         validate_value: function(arg) {
             var arr = $.makeArray(arg);
             var field_declaration = this;
+            var validated_arr;
             if ('legal_element_type' in field_declaration) {
                 value_constructor = field_declaration.legal_element_type;
-                var validated_arr = _(arr).map(function(el) {
+                validated_arr = _(arr).map(function(el) {
                     if (el.constructor === value_constructor) {
                         return el;
                     }
                     return new value_constructor(el);
                 });
+            }
+            else {
+                validated_arr = arr;
             }
             return validated_arr;
         }

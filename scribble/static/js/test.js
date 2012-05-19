@@ -271,3 +271,19 @@ test('Fields.foreign', function() {
     fi.set(5);
     equal(fi.get().object_type, 'user', 'Parametrized foreign created matching object');
 });
+
+test('Fields.array', function() {
+    expect(6);
+    var Fields = scribble._Fields;
+    var fd = new Fields.array();
+    var fi = new fd([{},1,2,'drei']);
+    deepEqual(fi.get(), [{},1,2,'drei'], 'Unrestricted array');
+    fi.set(1);
+    deepEqual(fi.get(), [1], 'Array constructed from single element');
+    fd = new Fields.array(scribble.User);
+    raises(function() { new fd('trash') }, 'Non-matching object rejected');
+    raises(function() { new fd([new scribble.User(1), 'trash']) }, 'Array with non-matching object rejected');
+    fi = new fd([new scribble.User({username: 'johndoe'})]);
+    deepEqual(fi.get()[0].values(), {username: 'johndoe'}, 'Array of matching objects accepted');
+    deepEqual(fi.db_value(), [{username: 'johndoe'}], 'Serialisation');
+});
