@@ -183,6 +183,11 @@ Represents an Ella object's primary key
                 }
                 else return date;
             }
+        },
+        field_fields: {
+            db_value: function() {
+                return this.get().toJSON();
+            }
         }
     });
 /*
