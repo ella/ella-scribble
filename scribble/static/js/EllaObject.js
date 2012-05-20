@@ -259,7 +259,7 @@ with the C<foreach> directive of Knockout.
             return rv;
         },
         _get_api_url: function() {
-            return '/api/r1/'+this.object_type+'/';
+            return '/api/r1/'+this.get_object_type()+'/';
         },
 /*
 
@@ -473,6 +473,21 @@ holding the actual value.
 */
         get_observable: function(field_name) {
             return this.fields[field_name].val;
+        },
+/*
+
+=item get_object_type
+
+Returns the name of the object type (like 'article').
+
+The object type is set at L</EllaObject.subclass> and is used to construct the
+URL for accessing corresponding object in the backend, so it is not arbitrary.
+
+=cut
+
+*/
+        get_object_type: function() {
+            return this.constructor.object_type;
         }
     };
 /*
@@ -556,12 +571,13 @@ declarations outside the C<EllaObject.subclass> function.
         }
         var subclass = function(arg) {
             var me = this;
-            
-            me.object_type = opt.type;
             me.constructor = subclass;
             return me.init(arg);
         };
-        $.extend(subclass, EllaObject_subclass_prototype, {field_declarations: {}});
+        $.extend(subclass, EllaObject_subclass_prototype, {
+            field_declarations: {},
+            object_type: opt.type
+        });
         
         subclass.declare_field('id', new Fields.id());
         _(opt.fields).each( function(field, name) {
