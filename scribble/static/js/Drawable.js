@@ -11,7 +11,7 @@ Drawable -- a mixin to let things render into HTML
     $.extend(obj, new Drawable({
         name: 'object',
         draw_modes: ['normal']
-    });
+    }));
     $('body').append( obj.draw() );
 
     <!-- in HTML -->
@@ -37,7 +37,7 @@ Drawable -- a mixin to let things render into HTML
     $.extend(album, new Drawable({
         name: 'album',
         draw_modes: ['detail']
-    });
+    }));
     _(tracks).each(function(track) {
         $.extend(track, new Drawable({
             name: 'track',
@@ -63,7 +63,7 @@ Drawable -- a mixin to let things render into HTML
     
     <script type="text/html" id="js-template-track-list_item">
         <label data-bind="text: title"></label>
-        <a onclick="$data.draw('detail').appendTo($('#track-detail').empty());">
+        <a data-bind="click: function() { $data.draw('detail').appendTo($('#track-detail').empty()); }">
             show detail
         </a>
     </script>
