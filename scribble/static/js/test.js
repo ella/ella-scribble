@@ -269,7 +269,7 @@ test('Fields.foreign', function() {
     equal(fi.get().get('id'), 2, 'Parametrized foreign accepted a matching ella object');
     raises(function() { fi.set(new scribble.Article) }, 'Parametrized foreign rejected non-matching ella object');
     fi.set(5);
-    equal(fi.get().object_type, 'user', 'Parametrized foreign created matching object');
+    equal(fi.get().get_object_type(), 'user', 'Parametrized foreign created matching object');
 });
 
 test('Fields.array', function() {
@@ -292,8 +292,9 @@ test('Fields.array', function() {
 module('Ella objects');
 
 test('Article', function() {
-    expect(3);
+    expect(4);
     var A = scribble.Article;
+    equal(A.object_type, 'article', 'Object type matches at constructor');
     deepEqual(
         _.keys(A.field_declarations).sort(),
         [
@@ -336,5 +337,142 @@ test('Article', function() {
             new scribble.Listing(2).values()
         ]
     }), 'Fields set correctly');
-    equal(a.object_type, 'article', 'Object type matches');
+    equal(a.get_object_type(), 'article', 'Object type matches at instance');
+});
+
+test('Author', function() {
+    expect(2);
+    var arg = {
+        user: {username: 'johndoe'},
+        name: 'John Doe',
+        slug: 'john-doe',
+        description: 'Anonymous man',
+        text: 'Lorem ipsum',
+        email: 'johndoe@example.com'
+    };
+    var a = new scribble.Author(arg);
+    deepEqual(a.values(), arg, 'Fields set correctly');
+    equal(a.get_object_type(), 'author', 'Object type matches');
+});
+
+test('Category', function() {
+    expect(2);
+    var arg = {
+        title: 'Good Stuff',
+        description: 'no bad stuff',
+        content: 'Yoghurt, Cake, Steak',
+        template: '<h1>{{ content }}</h1>',
+        slug: 'good-stuff',
+        site: { domain_name: 'example.com' },
+        app_data: '{"foo":[1,2]}',
+        parent_category: {
+            title: 'All stuff',
+            parent_category: 2
+        }
+    };
+    var c = new scribble.Category(arg);
+    arg.parent_category.parent_category = {id:2};
+    deepEqual(c.values(), arg, 'Fields set correctly');
+    equal(c.get_object_type(), 'category', 'Object type matches');
+});
+
+test('User', function() {
+    expect(2);
+    var arg = {
+        username: 'johndoe',
+        password: 'b8wl$fRr'
+    };
+    var u = new scribble.User(arg);
+    deepEqual(u.values(), arg, 'Fields set correctly');
+    equal(u.get_object_type(), 'user', 'Object type matches');
+});
+
+
+module('Drawable');
+
+test('Simple use', function() {
+    expect(1);
+    var Drawable = scribble._Drawable;
+    $('#qunit-fixture').html('\
+        <script type="text/html" id="js-template-object-normal">\
+            <h1>This object says:</h1>\
+            <p class="msg" data-bind="text: message"></p>\
+        </script>'
+    );
+    var obj = {message: 'Hello World!'};
+    $.extend(obj, new Drawable({
+        name: 'object',
+        draw_modes: ['normal']
+    }));
+    $('#qunit-fixture').append( obj.draw() );
+    equal($('#qunit-fixture .msg').text(), 'Hello World!', 'Template rendered');
+});
+
+test('Complex use', function() {
+    expect(3);
+    var Drawable = scribble._Drawable;
+    $('#qunit-fixture').html('\
+        <script type="text/html" id="js-template-album-detail">\
+            <h1 class="album-title">\
+                Album\
+                <span data-bind="text: title"></span>\
+                by\
+                <span data-bind="text: author"></span>\
+            </h1>\
+            <ol data-bind="foreach: tracks">\
+                <li data-bind="template: $data.get_template_id(\'list_item\')"></li>\
+            </ol>\
+        </script>\
+        \
+        <script type="text/html" id="js-template-track-list_item">\
+            <label data-bind="text: title"></label>\
+            <a data-bind="click: function(){$data.draw(\'detail\').appendTo($(\'#track-detail\').empty());}">\
+                show detail\
+            </a>\
+        </script>\
+        \
+        <script type="text/html" id="js-template-track-detail">\
+            <h1 data-bind="text: title"></h1>\
+            <p>lyrics by <span data-bind="text: lyrics"></span></p>\
+        </script>\
+        \
+        <div id="track-detail"></div>'
+    );
+    
+    var tracks = [
+        { title: 'As I Am',                 lyrics: 'John Petrucci' },
+        { title: 'This Dying Soul',         lyrics: 'Mike Portnoy'  },
+        { title: 'Endless Sacrifice',       lyrics: 'John Petrucci' },
+        { title: 'Honour Thy Father',       lyrics: 'Mike Portnoy'  },
+        { title: 'Vacant',                  lyrics: 'James LaBrie'  },
+        { title: 'Stream of Consciousness', lyrics: ''              },
+        { title: 'In the Name of God',      lyrics: 'John Petrucci' }
+    ];
+    var album = {
+        author: 'Dream Theater',
+        title: 'Train of Thought',
+        tracks: tracks
+    };
+    
+    $.extend(album, new Drawable({
+        name: 'album',
+        draw_modes: ['detail']
+    }));
+    _(tracks).each(function(track) {
+        $.extend(track, new Drawable({
+            name: 'track',
+            draw_modes: ['detail', 'list_item']
+        }));
+    });
+    
+    album.draw('detail').appendTo('#qunit-fixture');
+    
+    equal(
+        $.trim($('#qunit-fixture .album-title').text().replace(/ +/g, ' ')),
+        'Album Train of Thought by Dream Theater',
+        'Album name'
+    );
+    $('#qunit-fixture a').eq(2).click();
+    equal($('#qunit-fixture #track-detail h1').text(), 'Endless Sacrifice', 'Track detail name');
+    equal($('#qunit-fixture #track-detail p').text(), 'lyrics by John Petrucci', 'Track detail lyrics by');
 });
