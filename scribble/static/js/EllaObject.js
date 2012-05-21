@@ -627,6 +627,7 @@ ID, you know what DB row you're referring to.
             if (_.isArray(val)) {
                 _(val).each(function(el) {
                     if (el instanceof EllaObject) {
+                        if (el.get('id')) return;
                         requests.push( el.save() );
                     }
                 });
